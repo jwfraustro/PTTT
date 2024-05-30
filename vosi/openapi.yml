@@ -1,0 +1,125 @@
+# Minimal OpenAPI 3.0.3 specification for the IVOA VOSI interface
+
+
+openapi: 3.0.3
+info:
+  title: VOSI
+  version: '1.2'
+  description: 'IVOA Support Interface'
+  contact:
+    name: 'IVOA Grid and Web Services Working Group'
+    email: 'grid@ivoa.net'
+tags:
+  - name: 'tables'
+    description: 'VOSI Tables endpoints'
+  - name: 'capabilities'
+    description: 'VOSI Capabilities endpoints'
+  - name: 'availability'
+    description: 'VOSI Availability endpoints'
+servers:
+  - url: /
+paths:
+  /tables:
+    get:
+      summary: 'VOSI TableSet endpoint'
+      description: 'The VOSI TableSet endpoint provides a list of tables available in the service.'
+      operationId: 'getTables'
+      tags:
+        - 'tables'
+      parameters:
+        - name: detail
+          in: query
+          schema:
+            type: string
+            enum:
+              - min
+              - max
+          description: 'The detail parameter can be used to control the level of detail returned in the response. "max" is the complete metadata including all details of the Table elements. "min" includes the full set of Table elements, but does not include Table elements of type Column or ForeignKey.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: 'VOSI TableSet XML Response http://www.ivoa.net/xml/VODataService/v1.1#TableSet'
+  /tables/{table}:
+    get:
+      summary: 'VOSI Table endpoint'
+      description: 'The VOSI Table child endpoint provides the metadata for a single table.'
+      operationId: 'getTable'
+      tags:
+        - 'tables'
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 'The table name'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: 'VOSI Table XML Response http://www.ivoa.net/xml/VODataService/v1.1#Table'
+        '404':
+          description: Not Found
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: 'VOTable Error Response'
+  /availability:
+    get:
+      summary: 'VOSI Availability endpoint'
+      description: 'The VOSI Availability endpoint provides information about the availability of the service.'
+      operationId: 'getAvailability'
+      tags:
+        - 'availability'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Availability'
+  /capabilities:
+    get:
+      summary: 'VOSI Capabilities endpoint'
+      description: 'The VOSI Capabilities endpoint provides information about the capabilities of the service.'
+      operationId: 'getCapabilities'
+      tags:
+        - 'capabilities'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: 'VOSI Capabilities XML Response http://www.ivoa.net/xml/VODataService/v1.1#Capabilities'
+
+components:
+  schemas:
+    Availability:
+      description: 'VOSI Availability XML Response http://www.ivoa.net/xml/VODataService/v1.1#Availability'
+      type: object
+      properties:
+        available:
+          type: boolean
+          description: 'Whether the service is currently accepting requests.'
+        upSince:
+          type: string
+          description: 'Duration for which the service has been continuously available.'
+        downAt:
+          type: string
+          description: The instant at which the service is next scheduled to be unavailable.'
+        backAt:
+          type: string
+          description: The instant at which the service is scheduled to become available again after down time.'
+        note:
+          type: string
+          description: 'A textual note, e.g. explaining the reason for unavailability'
