@@ -1,7 +1,7 @@
 # Minimal OpenAPI 3.0.3 specification for the IVOA VOSI interface
 
-
 openapi: 3.0.3
+
 info:
   title: VOSI
   version: '1.2'
@@ -9,6 +9,12 @@ info:
   contact:
     name: 'IVOA Grid and Web Services Working Group'
     email: 'grid@ivoa.net'
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+security: []
+
 tags:
   - name: 'tables'
     description: 'VOSI Tables endpoints'
@@ -16,8 +22,10 @@ tags:
     description: 'VOSI Capabilities endpoints'
   - name: 'availability'
     description: 'VOSI Availability endpoints'
+
 servers:
   - url: /
+
 paths:
   /tables:
     get:
