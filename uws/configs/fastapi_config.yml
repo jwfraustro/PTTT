@@ -1,0 +1,6 @@
+inputSpec: uws/openapi.yml
+generatorName: python-fastapi
+outputDir: uws/generated/python-fastapi
+additionalProperties:
+  fastapiImplementationPackage: implementation
+  packageName: uws_server
