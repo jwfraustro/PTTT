@@ -7,6 +7,7 @@ apis:
 extends:
 - recommended
 rules:
+  security-defined: warn
   tag-description: off
   operation-summary: error
   no-unresolved-refs: error

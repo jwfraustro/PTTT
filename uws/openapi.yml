@@ -13,8 +13,6 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
-security: []
-
 servers:
   - url: /
 
@@ -78,9 +76,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}:
+  /{job_id}:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobSummary
       summary: 'Returns the job summary'
@@ -113,7 +111,7 @@ paths:
       operationId: postUpdateJob
       summary: Update job parameters
       parameters:
-        - $ref: '#/components/parameters/job-id'
+        - $ref: '#/components/parameters/job_id'
       requestBody:
         description: 'Parameters to update'
         required: true
@@ -158,7 +156,7 @@ paths:
       operationId: deleteJob
       summary: 'Deletes the job'
       parameters:
-        - $ref: '#/components/parameters/job-id'
+        - $ref: '#/components/parameters/job_id'
       responses:
         '200':
           description: Success
@@ -167,9 +165,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/phase:
+  /{job_id}/phase:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobPhase
       summary: 'Returns the job phase'
@@ -210,9 +208,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/executionduration:
+  /{job_id}/executionduration:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobExecutionDuration
       summary: 'Returns the job execution duration'
@@ -248,9 +246,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/destruction:
+  /{job_id}/destruction:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobDestruction
       summary: 'Returns the job destruction time'
@@ -295,9 +293,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/error:
+  /{job_id}/error:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobErrorSummary
       summary: 'Returns the job error summary'
@@ -315,9 +313,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/quote:
+  /{job_id}/quote:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobQuote
       summary: 'Returns the job quote'
@@ -333,9 +331,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/parameters:
+  /{job_id}/parameters:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobParameters
       summary: 'Returns the job parameters'
@@ -382,9 +380,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/results:
+  /{job_id}/results:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobResults
       summary: 'Returns the job results'
@@ -402,9 +400,9 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/JobNotFound'
-  /{job-id}/owner:
+  /{job_id}/owner:
     parameters:
-      - $ref: '#/components/parameters/job-id'
+      - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobOwner
       summary: 'Returns the job owner'
@@ -452,8 +450,8 @@ components:
           schema:
             $ref: '#/components/schemas/VOTableErrorMessage'
   parameters:
-    job-id:
-      name: job-id
+    job_id:
+      name: job_id
       in: path
       description: 'Job ID'
       required: true
@@ -467,7 +465,7 @@ components:
     ShortJobDescription:
       type: object
       title: shortJobDescription
-      required: [id]
+      required: [jobId]
       properties:
         phase:
           $ref: '#/components/schemas/ExecutionPhase'
@@ -604,7 +602,7 @@ components:
           nullable: true
           description: |
             A Quote predicts when the job is likely to complete -
-            returned at /{jobs}/{job-id}/quote "don't know" is
+            returned at /{jobs}/{job_id}/quote "don't know" is
             encoded by setting to the XML null value
             xsi:nil="true"
         creationTime:
@@ -636,14 +634,14 @@ components:
             The duration (in seconds) for which the job should be
             allowed to run - a value of 0 is intended to mean
             unlimited - returned at
-            /{jobs}/{job-id}/executionduration
+            /{jobs}/{job_id}/executionduration
         destruction:
           type: string
           format: date-time
           nullable: true
           description: |
             The time at which the whole job + records + results
-            will be destroyed. Returned at /{jobs}/{job-id}/destruction
+            will be destroyed. Returned at /{jobs}/{job_id}/destruction
         parameters:
           $ref: '#/components/schemas/Parameters'
         results:
@@ -677,7 +675,7 @@ components:
       description: |
         This is the information that is returned
         when a GET is made for a single job resource - i.e.
-        /{jobs}/{job-id}
+        /{jobs}/{job_id}
       xml:
         name: job
     Jobs:
@@ -727,7 +725,7 @@ components:
       type: object
       title: results
       description: |
-        The element returned for /{jobs}/{job-id}/results
+        The element returned for /{jobs}/{job_id}/results
       properties:
         result:
           type: array
@@ -740,7 +738,7 @@ components:
       title: errorSummary
       description: |
         A short summary of an error - a fuller representation of the
-        error may be retrieved from /{jobs}/{job-id}/error
+        error may be retrieved from /{jobs}/{job_id}/error
       required:
         - type
         - hasDetail
