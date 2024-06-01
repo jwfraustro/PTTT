@@ -16,17 +16,24 @@ info:
 servers:
   - url: /
 
+tags:
+  - name: UWS
+    description: 'Universal Worker Service'
+
 paths:
   /:
     get:
       operationId: getJobList
+      tags: [UWS]
       summary: Returns the list of UWS jobs
       parameters:
         - name: PHASE
           in: query
           description: 'Execution phase of the job to filter for'
           schema:
-            $ref: '#/components/schemas/ExecutionPhase'
+            type: array
+            items:
+              $ref: '#/components/schemas/ExecutionPhase'
         - name: AFTER
           in: query
           description: 'Return jobs submitted after this date'
@@ -49,6 +56,7 @@ paths:
           $ref: '#/components/responses/JobNotFound'
     post:
       operationId: postCreateJob
+      tags: [UWS]
       summary: 'Submits a job'
       requestBody:
         description: 'Job parameters'
@@ -81,6 +89,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobSummary
+      tags: [UWS]
       summary: 'Returns the job summary'
       parameters:
         - name: PHASE
@@ -109,6 +118,7 @@ paths:
           $ref: '#/components/responses/JobNotFound'
     post:
       operationId: postUpdateJob
+      tags: [UWS]
       summary: Update job parameters
       parameters:
         - $ref: '#/components/parameters/job_id'
@@ -154,6 +164,7 @@ paths:
           $ref: '#/components/responses/JobNotFound'
     delete:
       operationId: deleteJob
+      tags: [UWS]
       summary: 'Deletes the job'
       parameters:
         - $ref: '#/components/parameters/job_id'
@@ -170,6 +181,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobPhase
+      tags: [UWS]
       summary: 'Returns the job phase'
       responses:
         '200':
@@ -184,6 +196,7 @@ paths:
           $ref: '#/components/responses/JobNotFound'
     post:
       operationId: postUpdateJobPhase
+      tags: [UWS]
       summary: 'Updates the job phase'
       requestBody:
         description: 'Phase to update'
@@ -213,6 +226,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobExecutionDuration
+      tags: [UWS]
       summary: 'Returns the job execution duration'
       responses:
         '200':
@@ -227,6 +241,7 @@ paths:
           $ref: '#/components/responses/JobNotFound'
     post:
       operationId: postUpdateJobExecutionDuration
+      tags: [UWS]
       summary: 'Updates the job execution duration'
       requestBody:
         description: 'Execution duration to update'
@@ -251,6 +266,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobDestruction
+      tags: [UWS]
       summary: 'Returns the job destruction time'
       responses:
         '200':
@@ -266,6 +282,7 @@ paths:
           $ref: '#/components/responses/JobNotFound'
     post:
       operationId: postUpdateJobDestruction
+      tags: [UWS]
       summary: 'Updates the job destruction time'
       requestBody:
         description: 'Destruction time to update'
@@ -298,6 +315,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobErrorSummary
+      tags: [UWS]
       summary: 'Returns the job error summary'
       responses:
         '200':
@@ -318,6 +336,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobQuote
+      tags: [UWS]
       summary: 'Returns the job quote'
       responses:
         '200':
@@ -336,6 +355,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobParameters
+      tags: [UWS]
       summary: 'Returns the job parameters'
       responses:
         '200':
@@ -353,6 +373,7 @@ paths:
           $ref: '#/components/responses/JobNotFound'
     post:
       operationId: postUpdateJobParameters
+      tags: [UWS]
       summary: 'Update job parameters'
       requestBody:
         description: 'Destruction time to update'
@@ -385,6 +406,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobResults
+      tags: [UWS]
       summary: 'Returns the job results'
       responses:
         '200':
@@ -405,6 +427,7 @@ paths:
       - $ref: '#/components/parameters/job_id'
     get:
       operationId: getJobOwner
+      tags: [UWS]
       summary: 'Returns the job owner'
       responses:
         '200':
@@ -471,7 +494,6 @@ components:
           $ref: '#/components/schemas/ExecutionPhase'
         runId:
           type: string
-          maxItems: 1
           description: |
             This is a client supplied identifier - the UWS system
             does nothing other than to return it as part of the
@@ -577,7 +599,6 @@ components:
           example: 'HSC_XYZ_123'
         runId:
           type: string
-          maxItems: 1
           description: |
             this is a client supplied identifier - the UWS system
             does nothing other than to return it as part of the
@@ -598,7 +619,6 @@ components:
         quote:
           type: string
           format: date-time
-          maxItems: 1
           nullable: true
           description: |
             A Quote predicts when the job is likely to complete -
@@ -608,7 +628,6 @@ components:
         creationTime:
           type: string
           format: date-time
-          maxItems: 1
           description: |
             The instant at which the job was created.
 
@@ -650,7 +669,6 @@ components:
           $ref: '#/components/schemas/ErrorSummary'
         jobInfo:
           type: string
-          maxItems: 1
           description: |
             This is arbitrary information that can be added to the
             job description by the UWS implementation.
