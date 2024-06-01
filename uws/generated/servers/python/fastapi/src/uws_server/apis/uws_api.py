@@ -5,7 +5,7 @@ import importlib
 import pkgutil
 
 from uws_server.apis.uws_api_base import BaseUWSApi
-import implementation
+import uws_server_impl
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -38,7 +38,7 @@ from uws_server.models.results import Results
 
 router = APIRouter()
 
-ns_pkg = implementation
+ns_pkg = uws_server_impl
 for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 

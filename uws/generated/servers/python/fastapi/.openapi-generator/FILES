@@ -7,7 +7,6 @@ openapi.yaml
 pyproject.toml
 requirements.txt
 setup.cfg
-src/implementation/__init__.py
 src/uws_server/apis/__init__.py
 src/uws_server/apis/uws_api.py
 src/uws_server/apis/uws_api_base.py
@@ -32,4 +31,5 @@ src/uws_server/models/results.py
 src/uws_server/models/short_job_description.py
 src/uws_server/models/uws_version.py
 src/uws_server/security_api.py
+src/uws_server_impl/__init__.py
 tests/conftest.py
