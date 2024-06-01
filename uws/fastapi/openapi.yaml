@@ -1,0 +1,1262 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: grid@ivoa.net
+    name: IVOA Grid and Web Services Working Group
+  description: The Universal Worker Service (UWS) pattern defines how to manage asynchronous
+    execution of jobs on a service.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Universal Worker Service (UWS)
+  version: "1.2"
+servers:
+- url: /
+paths:
+  /:
+    get:
+      operationId: getJobList
+      parameters:
+      - description: Execution phase of the job to filter for
+        explode: true
+        in: query
+        name: PHASE
+        required: false
+        schema:
+          $ref: '#/components/schemas/ExecutionPhase'
+        style: form
+      - description: Return jobs submitted after this date
+        explode: true
+        in: query
+        name: AFTER
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: Return only the last N jobs
+        explode: true
+        in: query
+        name: LAST
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Jobs'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jobs'
+          description: Any response containing the UWS job list
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the list of UWS jobs
+    post:
+      operationId: postCreateJob
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postCreateJob_request'
+        description: Job parameters
+        required: true
+      responses:
+        "303":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+          description: Any response containing the job summary
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Submits a job
+  /{job_id}:
+    delete:
+      operationId: deleteJob
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Jobs'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jobs'
+          description: Any response containing the UWS job list
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Deletes the job
+    get:
+      operationId: getJobSummary
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Phase of the job to poll for
+        explode: true
+        in: query
+        name: PHASE
+        required: false
+        schema:
+          enum:
+          - PENDING
+          - QUEUED
+          - EXECUTING
+          example: PENDING
+          type: string
+        style: form
+      - description: Maximum time to wait for the job to change phases.
+        explode: true
+        in: query
+        name: WAIT
+        required: false
+        schema:
+          minimum: -1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+          description: Any response containing the job summary
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job summary
+    post:
+      operationId: postUpdateJob
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postUpdateJob_request'
+        description: Parameters to update
+        required: true
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                format: date-time
+                type: string
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+          description: "Success (when updating a job.) When updating the destruction\
+            \ time, the response is the new destruction time."
+        "303":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Jobs'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jobs'
+          description: Any response containing the UWS job list
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Update job parameters
+  /{job_id}/phase:
+    get:
+      operationId: getJobPhase
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ExecutionPhase'
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job phase
+    post:
+      operationId: postUpdateJobPhase
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postUpdateJobPhase_request'
+        description: Phase to update
+        required: true
+      responses:
+        "303":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+          description: Any response containing the job summary
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Updates the job phase
+  /{job_id}/executionduration:
+    get:
+      operationId: getJobExecutionDuration
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: integer
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job execution duration
+    post:
+      operationId: postUpdateJobExecutionDuration
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postUpdateJobExecutionDuration_request'
+        description: Execution duration to update
+        required: true
+      responses:
+        "303":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+          description: Any response containing the job summary
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Updates the job execution duration
+  /{job_id}/destruction:
+    get:
+      operationId: getJobDestruction
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                format: date-time
+                type: string
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job destruction time
+    post:
+      operationId: postUpdateJobDestruction
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postUpdateJobDestruction_request'
+        description: Destruction time to update
+        required: true
+      responses:
+        "303":
+          content:
+            text/plain:
+              schema:
+                format: date-time
+                type: string
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Updates the job destruction time
+  /{job_id}/error:
+    get:
+      operationId: getJobErrorSummary
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ErrorSummary'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorSummary'
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job error summary
+  /{job_id}/quote:
+    get:
+      operationId: getJobQuote
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                format: date-time
+                type: string
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job quote
+  /{job_id}/parameters:
+    get:
+      operationId: getJobParameters
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Parameters'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Parameters'
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job parameters
+    post:
+      operationId: postUpdateJobParameters
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postUpdateJobParameters_request'
+        description: Destruction time to update
+        required: true
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/JobSummary'
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Update job parameters
+  /{job_id}/results:
+    get:
+      operationId: getJobResults
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Results'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Results'
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job results
+  /{job_id}/owner:
+    get:
+      operationId: getJobOwner
+      parameters:
+      - description: Job ID
+        explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Success
+        "403":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Forbidden
+        "404":
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VOTableErrorMessage'
+          description: Job not found
+      summary: Returns the job owner
+components:
+  parameters:
+    job_id:
+      description: Job ID
+      explode: false
+      in: path
+      name: job_id
+      required: true
+      schema:
+        type: string
+      style: simple
+  responses:
+    JobListResponse:
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Jobs'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Jobs'
+      description: Any response containing the UWS job list
+    JobSummaryResponse:
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/JobSummary'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JobSummary'
+      description: Any response containing the job summary
+    JobNotFound:
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/VOTableErrorMessage'
+      description: Job not found
+    Forbidden:
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/VOTableErrorMessage'
+      description: Forbidden
+  schemas:
+    VOTableErrorMessage:
+      description: An error message in VOTable format
+      title: VOTABLE
+      type: object
+    ShortJobDescription:
+      example:
+        phase: PENDING
+        creationTime: 2000-01-23T04:56:07.000+00:00
+        runId: JWST-1234
+        id: HSC_XYZ_123
+        href: '.../jobs/HSC_XYZ_123'
+        ownerId: Noirlab/John.Smith
+        type: simple
+      properties:
+        phase:
+          $ref: '#/components/schemas/ExecutionPhase'
+        runId:
+          description: |
+            This is a client supplied identifier - the UWS system
+            does nothing other than to return it as part of the
+            description of the job
+          example: JWST-1234
+          maxItems: 1
+          title: runId
+          type: string
+        ownerId:
+          description: |
+            The owner (creator) of the job - this should be
+            expressed as a string that can be parsed in accordance
+            with IVOA security standards. If there was no
+            authenticated job creator then this should be set to
+            NULL.
+          example: Noirlab/John.Smith
+          nullable: true
+          title: ownerId
+          type: string
+        creationTime:
+          description: |
+            The instant at which the job was created.
+          format: date-time
+          nullable: false
+          title: creationTime
+          type: string
+        id:
+          description: |
+            The identifier for the job
+          example: HSC_XYZ_123
+          title: id
+          type: string
+          xml:
+            attribute: true
+        type:
+          default: simple
+          description: |
+            xlink type
+          title: type
+          type: string
+          xml:
+            attribute: true
+            namespace: http://www.w3.org/1999/xlink
+            prefix: xlink
+        href:
+          description: |
+            xlink href
+          example: '.../jobs/HSC_XYZ_123'
+          title: href
+          type: string
+          xml:
+            attribute: true
+            namespace: http://www.w3.org/1999/xlink
+            prefix: xlink
+      required:
+      - id
+      title: shortJobDescription
+      type: object
+    ExecutionPhase:
+      description: |
+        Enumeration of possible phases of job execution
+
+        PENDING: The first phase a job is entered into - this is where
+              a job is being set up but no request to run has
+              occurred.
+
+        QUEUED: A job has been accepted for execution but is waiting
+              in a queue
+
+        EXECUTING: A job is running
+
+        COMPLETED: A job has completed successfully
+
+        ERROR: Some form of error has occurred
+
+        UNKNOWN: The job is in an unknown state.
+
+        HELD: The job is HELD pending execution and will not
+              automatically be executed - can occur after a
+              PHASE=RUN request has been made (cf PENDING).
+
+        SUSPENDED: The job has been suspended by the system during
+              execution
+
+        ABORTED: The job has been aborted, either by user request or by
+              the server because of lack or overuse of resources.
+
+        ARCHIVED: The job has been archived by the server at destruction time. An archived job
+              may have deleted the results to reclaim resources, but must have job metadata preserved.
+              This is an alternative that the server may choose in contrast to completely destroying all record of the job.
+      enum:
+      - PENDING
+      - QUEUED
+      - EXECUTING
+      - COMPLETED
+      - ERROR
+      - UNKNOWN
+      - HELD
+      - SUSPENDED
+      - ABORTED
+      - ARCHIVED
+      title: executionPhase
+      type: string
+    JobSummary:
+      description: |
+        The complete representation of the state of a job
+      example:
+        phase: PENDING
+        creationTime: 2000-01-23T04:56:07.000+00:00
+        executionDuration: 0
+        ownerId: Noirlab/John.Smith
+        errorSummary:
+          hasDetail: true
+          message: Error Message
+          type: transient
+        jobInfo: jobInfo
+        version: "1.0"
+        jobId: HSC_XYZ_123
+        quote: 2000-01-23T04:56:07.000+00:00
+        startTime: 2000-01-23T04:56:07.000+00:00
+        runId: JWST-1234
+        endTime: 2000-01-23T04:56:07.000+00:00
+        parameters:
+          parameter:
+          - byReference: false
+            id: id
+            isPost: true
+          - byReference: false
+            id: id
+            isPost: true
+        results:
+          result:
+          - reference: reference
+            mime-type: mime-type
+            size: 6.027456183070403
+            id: id
+          - reference: reference
+            mime-type: mime-type
+            size: 6.027456183070403
+            id: id
+        destruction: 2000-01-23T04:56:07.000+00:00
+      properties:
+        jobId:
+          description: |
+            The identifier for the job
+          example: HSC_XYZ_123
+          title: jobId
+          type: string
+        runId:
+          description: |
+            this is a client supplied identifier - the UWS system
+            does nothing other than to return it as part of the
+            description of the job
+          example: JWST-1234
+          maxItems: 1
+          title: runId
+          type: string
+        ownerId:
+          description: |
+            The owner (creator) of the job - this should be
+            expressed as a string that can be parsed in accordance
+            with IVOA security standards. If there was no
+            authenticated job creator then this should be set to
+            NULL.
+          example: Noirlab/John.Smith
+          nullable: true
+          title: ownerId
+          type: string
+        phase:
+          $ref: '#/components/schemas/ExecutionPhase'
+        quote:
+          description: |
+            A Quote predicts when the job is likely to complete -
+            returned at /{jobs}/{job_id}/quote "don't know" is
+            encoded by setting to the XML null value
+            xsi:nil="true"
+          format: date-time
+          maxItems: 1
+          nullable: true
+          title: quote
+          type: string
+        creationTime:
+          description: |
+            The instant at which the job was created.
+
+            Note that the version 1.1 of the specification requires that this element be present.
+            It is optional only in versions 1.x of the schema for backwards compatibility.
+            2.0+ versions of the schema will make this formally mandatory in an XML sense.
+          format: date-time
+          maxItems: 1
+          title: creationTime
+          type: string
+        startTime:
+          description: |
+            The instant at which the job started execution.
+          format: date-time
+          nullable: true
+          title: startTime
+          type: string
+        endTime:
+          description: |
+            The instant at which the job finished execution.
+          format: date-time
+          nullable: true
+          title: endTime
+          type: string
+        executionDuration:
+          description: |
+            The duration (in seconds) for which the job should be
+            allowed to run - a value of 0 is intended to mean
+            unlimited - returned at
+            /{jobs}/{job_id}/executionduration
+          nullable: false
+          title: executionDuration
+          type: integer
+        destruction:
+          description: |
+            The time at which the whole job + records + results
+            will be destroyed. Returned at /{jobs}/{job_id}/destruction
+          format: date-time
+          nullable: true
+          title: destruction
+          type: string
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+        results:
+          $ref: '#/components/schemas/Results'
+        errorSummary:
+          $ref: '#/components/schemas/ErrorSummary'
+        jobInfo:
+          description: |
+            This is arbitrary information that can be added to the
+            job description by the UWS implementation.
+          maxItems: 1
+          title: jobInfo
+          type: string
+        version:
+          $ref: '#/components/schemas/UWSVersion'
+      required:
+      - jobId
+      title: jobSummary
+      type: object
+    UWSVersion:
+      description: |
+        The version of the UWS standard that the server complies with.
+      enum:
+      - "1.0"
+      - "1.1"
+      title: UWSVersion
+      type: string
+      xml:
+        attribute: true
+        prefix: uws
+    Job:
+      allOf:
+      - $ref: '#/components/schemas/JobSummary'
+      description: |
+        This is the information that is returned
+        when a GET is made for a single job resource - i.e.
+        /{jobs}/{job_id}
+      title: job
+      type: object
+      xml:
+        name: job
+    Jobs:
+      description: |
+        The list of job references returned at /(jobs)
+
+        The list presented may be affected by the current security context and may be filtered
+      example:
+        jobref:
+        - phase: PENDING
+          creationTime: 2000-01-23T04:56:07.000+00:00
+          runId: JWST-1234
+          id: HSC_XYZ_123
+          href: '.../jobs/HSC_XYZ_123'
+          ownerId: Noirlab/John.Smith
+          type: simple
+        - phase: PENDING
+          creationTime: 2000-01-23T04:56:07.000+00:00
+          runId: JWST-1234
+          id: HSC_XYZ_123
+          href: '.../jobs/HSC_XYZ_123'
+          ownerId: Noirlab/John.Smith
+          type: simple
+        version: "1.0"
+      properties:
+        jobref:
+          items:
+            $ref: '#/components/schemas/ShortJobDescription'
+          title: jobref
+          type: array
+        version:
+          $ref: '#/components/schemas/UWSVersion'
+      title: jobs
+      type: object
+      xml:
+        name: jobs
+    ResultReference:
+      description: |
+        A reference to a UWS result
+      example:
+        reference: reference
+        mime-type: mime-type
+        size: 6.027456183070403
+        id: id
+      properties:
+        id:
+          title: id
+          type: string
+          xml:
+            attribute: true
+        reference:
+          description: |
+            The URL that can be used to retrieve the result
+          title: reference
+          type: string
+          xml:
+            attribute: true
+            prefix: uws
+        size:
+          title: size
+          type: number
+          xml:
+            attribute: true
+        mime-type:
+          title: mime-type
+          type: string
+          xml:
+            attribute: true
+      required:
+      - id
+      title: resultReference
+      type: object
+    Results:
+      description: |
+        The element returned for /{jobs}/{job_id}/results
+      example:
+        result:
+        - reference: reference
+          mime-type: mime-type
+          size: 6.027456183070403
+          id: id
+        - reference: reference
+          mime-type: mime-type
+          size: 6.027456183070403
+          id: id
+      properties:
+        result:
+          items:
+            $ref: '#/components/schemas/ResultReference'
+          title: result
+          type: array
+      title: results
+      type: object
+      xml:
+        name: results
+    ErrorSummary:
+      description: |
+        A short summary of an error - a fuller representation of the
+        error may be retrieved from /{jobs}/{job_id}/error
+      example:
+        hasDetail: true
+        message: Error Message
+        type: transient
+      properties:
+        message:
+          description: |
+            A short message describing the error
+          example: Error Message
+          title: message
+          type: string
+        hasDetail:
+          title: hasDetail
+          type: boolean
+          xml:
+            attribute: true
+        type:
+          description: |
+            characterization of the type of the error
+          enum:
+          - transient
+          - fatal
+          title: type
+          type: string
+          xml:
+            attribute: true
+      required:
+      - hasDetail
+      - type
+      title: errorSummary
+      type: object
+      xml:
+        name: errorSummary
+    Parameter:
+      description: |
+        The list of input parameters to the job - if
+        the job description language does not naturally have
+        parameters, then this list should contain one element which
+        is the content of the original POST that created the job.
+      example:
+        byReference: false
+        id: id
+        isPost: true
+      properties:
+        byReference:
+          default: false
+          description: |
+            If this attribute is true then the
+            content of the parameter represents a URL to retrieve the
+            actual parameter value.
+
+            It is up to the implementation to decide
+            if a parameter value cannot be returned directly as the
+            content - the basic rule is that the representation of
+            the parameter must allow the whole job element to be
+            valid XML. If this cannot be achieved then the parameter
+            value must be returned by reference.
+          title: byReference
+          type: boolean
+          xml:
+            attribute: true
+        id:
+          description: |
+            The identifier for the parameter
+          title: id
+          type: string
+          xml:
+            attribute: true
+        isPost:
+          title: isPost
+          type: boolean
+          xml:
+            attribute: true
+      required:
+      - id
+      title: parameter
+      type: object
+      xml:
+        name: parameter
+    Parameters:
+      example:
+        parameter:
+        - byReference: false
+          id: id
+          isPost: true
+        - byReference: false
+          id: id
+          isPost: true
+      properties:
+        parameter:
+          items:
+            $ref: '#/components/schemas/Parameter'
+          title: parameter
+          type: array
+      title: parameters
+      type: object
+    postCreateJob_request:
+      additionalProperties: true
+      properties:
+        QUERY:
+          description: The query to be performed
+          example: SELECT * FROM TAP_SCHEMA.tables
+          type: string
+        LANG:
+          description: The language in which the query should be performed
+          example: ADQL
+          type: string
+      title: postCreateJob_request
+      type: object
+    postUpdateJob_request:
+      properties:
+        PHASE:
+          enum:
+          - RUN
+          - ABORT
+          - SUSPEND
+          - ARCHIVE
+          title: PHASE
+          type: string
+        DESTRUCTION:
+          format: date-time
+          title: DESTRUCTION
+          type: string
+        ACTION:
+          enum:
+          - DELETE
+          title: ACTION
+          type: string
+      title: postUpdateJob_request
+      type: object
+    postUpdateJobPhase_request:
+      properties:
+        PHASE:
+          enum:
+          - RUN
+          - ABORT
+          - SUSPEND
+          - ARCHIVE
+          title: PHASE
+          type: string
+      title: postUpdateJobPhase_request
+      type: object
+    postUpdateJobExecutionDuration_request:
+      properties:
+        EXECUTIONDURATION:
+          title: EXECUTIONDURATION
+          type: integer
+      title: postUpdateJobExecutionDuration_request
+      type: object
+    postUpdateJobDestruction_request:
+      properties:
+        DESTRUCTION:
+          format: date-time
+          title: DESTRUCTION
+          type: string
+      title: postUpdateJobDestruction_request
+      type: object
+    postUpdateJobParameters_request:
+      properties:
+        QUERY:
+          description: TAP query string
+          title: QUERY
+          type: string
+        LANG:
+          description: Query language
+          title: LANG
+          type: string
+      title: postUpdateJobParameters_request
+      type: object
