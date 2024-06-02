@@ -64,18 +64,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                # Examples for TAP implementation
-                QUERY:
-                  type: string
-                  description: 'The query to be performed'
-                  example: 'SELECT * FROM TAP_SCHEMA.tables'
-                LANG:
-                  type: string
-                  description: 'The language in which the query should be performed'
-                  example: 'ADQL'
-              additionalProperties: true
+              $ref: '#/components/schemas/Parameters'
       responses:
         '303':
           description: "Success"

@@ -1,11 +1,12 @@
 # coding: utf-8
 
 from typing import Dict, List  # noqa: F401
+from datetime import datetime
 import importlib
 import pkgutil
 
 from uws_server.apis.uws_api_base import BaseUWSApi
-import uws_server_impl
+import impl
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -27,7 +28,6 @@ from uws_server.models.execution_phase import ExecutionPhase
 from uws_server.models.job_summary import JobSummary
 from uws_server.models.jobs import Jobs
 from uws_server.models.parameters import Parameters
-from uws_server.models.post_create_job_request import PostCreateJobRequest
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest
 from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest
 from uws_server.models.post_update_job_parameters_request import PostUpdateJobParametersRequest
@@ -38,7 +38,7 @@ from uws_server.models.results import Results
 
 router = APIRouter()
 
-ns_pkg = uws_server_impl
+ns_pkg = impl
 for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 
@@ -246,7 +246,7 @@ async def get_job_summary(
     response_model_by_alias=True,
 )
 async def post_create_job(
-    post_create_job_request: PostCreateJobRequest = Body(None, description="Job parameters"),
+    parameters: Parameters = Body(None, description="Job parameters"),
 ) -> None:
     ...
 

@@ -1,6 +1,8 @@
 inputSpec: uws/openapi.yml
 generatorName: python-fastapi
 outputDir: uws/generated/servers/python/fastapi
+templateDir: generator_templates/python-fastapi
 additionalProperties:
-  fastapiImplementationPackage: uws_server_impl
+  fastapiImplementationPackage: impl
   packageName: uws_server
+files:

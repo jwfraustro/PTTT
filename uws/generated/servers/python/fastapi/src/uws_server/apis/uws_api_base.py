@@ -7,7 +7,6 @@ from uws_server.models.execution_phase import ExecutionPhase
 from uws_server.models.job_summary import JobSummary
 from uws_server.models.jobs import Jobs
 from uws_server.models.parameters import Parameters
-from uws_server.models.post_create_job_request import PostCreateJobRequest
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest
 from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest
 from uws_server.models.post_update_job_parameters_request import PostUpdateJobParametersRequest
@@ -105,7 +104,7 @@ class BaseUWSApi:
 
     def post_create_job(
         self,
-        post_create_job_request: PostCreateJobRequest,
+        parameters: Parameters,
     ) -> None:
         ...
 

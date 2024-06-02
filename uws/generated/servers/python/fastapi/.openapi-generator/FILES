@@ -7,6 +7,7 @@ openapi.yaml
 pyproject.toml
 requirements.txt
 setup.cfg
+src/impl/__init__.py
 src/uws_server/apis/__init__.py
 src/uws_server/apis/uws_api.py
 src/uws_server/apis/uws_api_base.py
@@ -20,7 +21,6 @@ src/uws_server/models/job_summary.py
 src/uws_server/models/jobs.py
 src/uws_server/models/parameter.py
 src/uws_server/models/parameters.py
-src/uws_server/models/post_create_job_request.py
 src/uws_server/models/post_update_job_destruction_request.py
 src/uws_server/models/post_update_job_execution_duration_request.py
 src/uws_server/models/post_update_job_parameters_request.py
@@ -31,5 +31,4 @@ src/uws_server/models/results.py
 src/uws_server/models/short_job_description.py
 src/uws_server/models/uws_version.py
 src/uws_server/security_api.py
-src/uws_server_impl/__init__.py
 tests/conftest.py
