@@ -1,0 +1,4 @@
+inputSpec: {{ cookiecutter.output_dir }}/openapi.yml
+generatorName: python-fastapi
+outputDir: {{ cookiecutter.output_dir }}/generated/servers/python/fastapi
+templateDir: templates/generators/python-fastapi

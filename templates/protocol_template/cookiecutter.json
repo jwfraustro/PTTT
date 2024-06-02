@@ -1,0 +1,18 @@
+{
+    "protocol_name": null,
+    "output_dir": "{{ cookiecutter.protocol_name | lower() | replace(' ', '-') }}",
+    "protocol_full_title": "{{ cookiecutter.protocol_name }}",
+    "protocol_description": "{{ cookiecutter.protocol_full_title }}",
+    "protocol_version": "1.0",
+    "wg_name": "IVOA Working Group",
+    "wg_email": "ivoadoc@ivoa.net",
+    "__prompts__": {
+        "protocol_name": "Name of the protocol (e.g. UWS, TAP, Conesearch)",
+        "output_dir": "Output directory for the protocol specification",
+        "protocol_full_title": "Full title of the protocol (e.g. Universal Worker Service (UWS))",
+        "protocol_description": "Short description of the protocol",
+        "protocol_version": "Version of the protocol",
+        "wg_name": "Name of the IVOA Working Group responsible for the protocol",
+        "wg_email": "Email address of the IVOA Working Group responsible for the protocol",
+    }
+}
