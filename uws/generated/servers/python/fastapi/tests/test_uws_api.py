@@ -8,7 +8,6 @@ from uws_server.models.execution_phase import ExecutionPhase  # noqa: F401
 from uws_server.models.job_summary import JobSummary  # noqa: F401
 from uws_server.models.jobs import Jobs  # noqa: F401
 from uws_server.models.parameters import Parameters  # noqa: F401
-from uws_server.models.post_create_job_request import PostCreateJobRequest  # noqa: F401
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest  # noqa: F401
 from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest  # noqa: F401
 from uws_server.models.post_update_job_parameters_request import PostUpdateJobParametersRequest  # noqa: F401
@@ -233,7 +232,7 @@ def test_post_create_job(client: TestClient):
 
     Submits a job
     """
-    post_create_job_request = uws_server.PostCreateJobRequest()
+    parameters = {"parameter":[{"by_reference":0,"id":"id","is_post":1},{"by_reference":0,"id":"id","is_post":1}]}
 
     headers = {
     }
@@ -242,7 +241,7 @@ def test_post_create_job(client: TestClient):
     #    "POST",
     #    "/",
     #    headers=headers,
-    #    json=post_create_job_request,
+    #    json=parameters,
     #)
 
     # uncomment below to assert the status code of the HTTP response

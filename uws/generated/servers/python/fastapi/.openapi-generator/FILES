@@ -32,3 +32,4 @@ src/uws_server/models/short_job_description.py
 src/uws_server/models/uws_version.py
 src/uws_server/security_api.py
 tests/conftest.py
+tests/test_uws_api.py
