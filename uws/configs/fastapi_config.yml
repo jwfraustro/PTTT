@@ -5,4 +5,3 @@ templateDir: generator_templates/python-fastapi
 additionalProperties:
   fastapiImplementationPackage: impl
   packageName: uws_server
-files:
