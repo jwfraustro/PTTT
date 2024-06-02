@@ -64,5 +64,5 @@ output-generator-cli generate -c <path-to-config-file> --minimal-updates
 
 #### Customizing code generation
 
-The code output of OpenAPI Generator can be customized using mustache templates, stored in the `/templates/generators/` directory. See [TEMPLATES.md](/templates/TEMPLATES.md) for more information on how to use these templates.
+The code output of OpenAPI Generator can be customized using mustache templates, stored in the `/templates/code_generation/` directory. See [TEMPLATES.md](/templates/TEMPLATES.md) for more information on how to use these templates.
 
