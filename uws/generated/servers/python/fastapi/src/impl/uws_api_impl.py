@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
 from uws_server.apis.uws_api_base import BaseUWSApi
 from uws_server.models.error_summary import ErrorSummary
 from uws_server.models.execution_phase import ExecutionPhase
@@ -35,7 +35,13 @@ class UWSAPIImpl(BaseUWSApi):
         if not job_cache.get_job(job_id):
             return JSONResponse(status_code=404, content={"message": "Job not found"})
 
+        job = job_cache.get_job(job_id)
+
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
         job_cache.delete_job(job_id)
+
+        return RedirectResponse(url="/uws")
 
     def get_job_destruction(
         self,
@@ -44,7 +50,10 @@ class UWSAPIImpl(BaseUWSApi):
         job = job_cache.get_job(job_id)
         if not job:
             return JSONResponse(status_code=404, content={"message": "Job not found"})
-        return job_cache.delete_job(job_id)
+
+        if not job.destruction:
+            return PlainTextResponse("")
+        return PlainTextResponse(content=job.destruction.isoformat())  # pylint:disable=no-member
 
     def get_job_error_summary(
         self,
@@ -62,7 +71,7 @@ class UWSAPIImpl(BaseUWSApi):
         job = job_cache.get_job(job_id)
         if not job:
             return JSONResponse(status_code=404, content={"message": "Job not found"})
-        return job.execution_duration
+        return PlainTextResponse(content=str(job.execution_duration))
 
     def get_job_owner(
         self,
@@ -71,7 +80,7 @@ class UWSAPIImpl(BaseUWSApi):
         job = job_cache.get_job(job_id)
         if not job:
             return JSONResponse(status_code=404, content={"message": "Job not found"})
-        return job.owner_id
+        return PlainTextResponse(content=job.owner_id)
 
     def get_job_parameters(
         self,
@@ -89,7 +98,7 @@ class UWSAPIImpl(BaseUWSApi):
         job = job_cache.get_job(job_id)
         if not job:
             return JSONResponse(status_code=404, content={"message": "Job not found"})
-        return job.phase
+        return PlainTextResponse(content=job.phase.value)
 
     def get_job_quote(
         self,
@@ -98,7 +107,9 @@ class UWSAPIImpl(BaseUWSApi):
         job = job_cache.get_job(job_id)
         if not job:
             return JSONResponse(status_code=404, content={"message": "Job not found"})
-        return job.quote
+        if not job.quote:
+            return PlainTextResponse("")
+        return PlainTextResponse(content=job.quote.isoformat())  # pylint:disable=no-member
 
     def get_job_results(
         self,
@@ -107,7 +118,7 @@ class UWSAPIImpl(BaseUWSApi):
         job = job_cache.get_job(job_id)
         if not job:
             return JSONResponse(status_code=404, content={"message": "Job not found"})
-        return job.destruction
+        return job.results
 
     def get_job_summary(
         self,
