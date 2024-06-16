@@ -1,12 +1,24 @@
 """Example in-memory UWS job cache implementation."""
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
 from uws_server.models.execution_phase import ExecutionPhase
 from uws_server.models.job_summary import JobSummary
 from uws_server.models.jobs import Jobs
 from uws_server.models.short_job_description import ShortJobDescription
+
+# a service implementing UWS may have some values that are created on job creation, and some
+# might be submitted by the user as part of the service.
+# Here we define some example values that could appear in a UWS job, to use as a demonstration
+SAMPLE_JOB_VALUES = {
+    "run_id": "my_run_id",
+    "owner_id": "jsmith@ivoa.net",
+    "quote": datetime.now() + timedelta(hours=1),
+    "start_time": datetime.now() + timedelta(minutes=5),
+    "execution_duration": 3600,
+    "destruction": datetime.now() + timedelta(days=3),
+}
 
 
 class UWSCache:
@@ -66,7 +78,7 @@ class UWSCache:
     def add_job(self, job_id: str, job: dict):
         """Add a job to the cache."""
 
-        self.jobs[job_id] = job
+        self.jobs[job_id] = job | SAMPLE_JOB_VALUES
 
     def update_job(self, job_id: str, job: dict):
         """Update a job in the cache."""
