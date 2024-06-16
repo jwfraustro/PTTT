@@ -51,9 +51,6 @@ paths:
       responses:
         "200":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Jobs'
             application/json:
               schema:
                 $ref: '#/components/schemas/Jobs'
@@ -85,9 +82,6 @@ paths:
       responses:
         "303":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/JobSummary'
             application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
@@ -122,9 +116,6 @@ paths:
       responses:
         "303":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Jobs'
             application/json:
               schema:
                 $ref: '#/components/schemas/Jobs'
@@ -180,9 +171,6 @@ paths:
       responses:
         "200":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/JobSummary'
             application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
@@ -218,29 +206,15 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/postUpdateJob_request'
-        description: Parameters to update
+        description: Values to update
         required: true
       responses:
-        "200":
-          content:
-            text/plain:
-              schema:
-                format: date-time
-                type: string
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/JobSummary'
-          description: "Success (when updating a job.) When updating the destruction\
-            \ time, the response is the new destruction time."
         "303":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Jobs'
             application/json:
               schema:
-                $ref: '#/components/schemas/Jobs'
-          description: Any response containing the UWS job list
+                $ref: '#/components/schemas/postUpdateJob_303_response'
+          description: Success
         "403":
           content:
             application/xml:
@@ -253,7 +227,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/VOTableErrorMessage'
           description: Job not found
-      summary: Update job parameters
+      summary: Update job values
       tags:
       - UWS
   /{job_id}/phase:
@@ -311,9 +285,6 @@ paths:
       responses:
         "303":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/JobSummary'
             application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
@@ -388,9 +359,6 @@ paths:
       responses:
         "303":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/JobSummary'
             application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
@@ -466,11 +434,7 @@ paths:
       responses:
         "303":
           content:
-            text/plain:
-              schema:
-                format: date-time
-                type: string
-            application/xml:
+            application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
           description: Success
@@ -504,9 +468,6 @@ paths:
       responses:
         "200":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ErrorSummary'
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorSummary'
@@ -576,9 +537,6 @@ paths:
       responses:
         "200":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Parameters'
             application/json:
               schema:
                 $ref: '#/components/schemas/Parameters'
@@ -619,7 +577,7 @@ paths:
       responses:
         "303":
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
           description: Success
@@ -653,9 +611,6 @@ paths:
       responses:
         "200":
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Results'
             application/json:
               schema:
                 $ref: '#/components/schemas/Results'
@@ -723,18 +678,12 @@ components:
   responses:
     JobListResponse:
       content:
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Jobs'
         application/json:
           schema:
             $ref: '#/components/schemas/Jobs'
       description: Any response containing the UWS job list
     JobSummaryResponse:
       content:
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/JobSummary'
         application/json:
           schema:
             $ref: '#/components/schemas/JobSummary'
@@ -1252,6 +1201,11 @@ components:
           type: string
       title: postUpdateJob_request
       type: object
+    postUpdateJob_303_response:
+      oneOf:
+      - $ref: '#/components/schemas/Jobs'
+      - $ref: '#/components/schemas/JobSummary'
+      title: postUpdateJob_303_response
     postUpdateJobPhase_request:
       properties:
         PHASE:

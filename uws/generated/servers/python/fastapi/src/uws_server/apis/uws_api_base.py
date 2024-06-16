@@ -8,6 +8,7 @@ from uws_server.models.execution_phase import ExecutionPhase
 from uws_server.models.job_summary import JobSummary
 from uws_server.models.jobs import Jobs
 from uws_server.models.parameters import Parameters
+from uws_server.models.post_update_job303_response import PostUpdateJob303Response
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest
 from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest
 from uws_server.models.post_update_job_phase_request import PostUpdateJobPhaseRequest
@@ -113,7 +114,7 @@ class BaseUWSApi:
         self,
         job_id: str,
         post_update_job_request: PostUpdateJobRequest,
-    ) -> datetime:
+    ) -> None:
         ...
 
 

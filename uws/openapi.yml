@@ -108,11 +108,11 @@ paths:
     post:
       operationId: postUpdateJob
       tags: [UWS]
-      summary: Update job parameters
+      summary: Update job values
       parameters:
         - $ref: '#/components/parameters/job_id'
       requestBody:
-        description: 'Parameters to update'
+        description: 'Values to update'
         required: true
         content:
           application/json:
@@ -134,19 +134,14 @@ paths:
                   enum:
                     - "DELETE"
       responses:
-        '200':
-          description: Success (when updating a job.) When updating the destruction time, the response is the new destruction time.
-          content:
-            text/plain:
-              schema:
-                type: string
-                format: date-time
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/JobSummary'
         '303':
-          description: Success (when deleting a job.)
-          $ref: '#/components/responses/JobListResponse'
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Jobs'
+                  - $ref: '#/components/schemas/JobSummary'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -288,11 +283,7 @@ paths:
         '303':
           description: Success
           content:
-            text/plain:
-              schema:
-                type: string
-                format: date-time
-            application/xml:
+            application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
         '403':
@@ -310,9 +301,6 @@ paths:
         '200':
           description: Success
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ErrorSummary'
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorSummary'
@@ -350,9 +338,6 @@ paths:
         '200':
           description: Success
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Parameters'
             application/json:
               schema:
                 $ref: '#/components/schemas/Parameters'
@@ -375,7 +360,7 @@ paths:
         '303':
           description: Success
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: '#/components/schemas/JobSummary'
         '403':
@@ -393,9 +378,6 @@ paths:
         '200':
           description: Success
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Results'
             application/json:
               schema:
                 $ref: '#/components/schemas/Results'
@@ -426,18 +408,12 @@ components:
     JobListResponse:
       description: 'Any response containing the UWS job list'
       content:
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Jobs'
         application/json:
           schema:
             $ref: '#/components/schemas/Jobs'
     JobSummaryResponse:
       description: 'Any response containing the job summary'
       content:
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/JobSummary'
         application/json:
           schema:
             $ref: '#/components/schemas/JobSummary'

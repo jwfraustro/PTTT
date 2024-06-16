@@ -28,6 +28,7 @@ from uws_server.models.execution_phase import ExecutionPhase
 from uws_server.models.job_summary import JobSummary
 from uws_server.models.jobs import Jobs
 from uws_server.models.parameters import Parameters
+from uws_server.models.post_update_job303_response import PostUpdateJob303Response
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest
 from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest
 from uws_server.models.post_update_job_phase_request import PostUpdateJobPhaseRequest
@@ -265,19 +266,18 @@ async def post_create_job(
 @router.post(
     "/uws/{job_id}",
     responses={
-        200: {"model": datetime, "description": "Success (when updating a job.) When updating the destruction time, the response is the new destruction time."},
-        303: {"model": Jobs, "description": "Any response containing the UWS job list"},
+        303: {"model": PostUpdateJob303Response, "description": "Success"},
         403: {"model": object, "description": "Forbidden"},
         404: {"model": object, "description": "Job not found"},
     },
     tags=["UWS"],
-    summary="Update job parameters",
+    summary="Update job values",
     response_model_by_alias=True,
 )
 async def post_update_job(
     job_id: str = Path(..., description="Job ID"),
-    post_update_job_request: PostUpdateJobRequest = Body(None, description="Parameters to update"),
-) -> datetime:
+    post_update_job_request: PostUpdateJobRequest = Body(None, description="Values to update"),
+) -> None:
     
     return BaseUWSApi.subclasses[0]().post_update_job(job_id, post_update_job_request)
 
@@ -285,7 +285,7 @@ async def post_update_job(
 @router.post(
     "/uws/{job_id}/destruction",
     responses={
-        303: {"model": datetime, "description": "Success"},
+        303: {"model": JobSummary, "description": "Success"},
         403: {"model": object, "description": "Forbidden"},
         404: {"model": object, "description": "Job not found"},
     },
