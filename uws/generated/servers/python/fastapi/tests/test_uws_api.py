@@ -1,19 +1,42 @@
 # coding: utf-8
 
 from fastapi.testclient import TestClient
-
-
+from uws_server.main import app
 from uws_server.models.error_summary import ErrorSummary  # noqa: F401
 from uws_server.models.execution_phase import ExecutionPhase  # noqa: F401
 from uws_server.models.job_summary import JobSummary  # noqa: F401
 from uws_server.models.jobs import Jobs  # noqa: F401
 from uws_server.models.parameters import Parameters  # noqa: F401
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest  # noqa: F401
-from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest  # noqa: F401
+from uws_server.models.post_update_job_execution_duration_request import (
+    PostUpdateJobExecutionDurationRequest,  # noqa: F401
+)
 from uws_server.models.post_update_job_parameters_request import PostUpdateJobParametersRequest  # noqa: F401
 from uws_server.models.post_update_job_phase_request import PostUpdateJobPhaseRequest  # noqa: F401
 from uws_server.models.post_update_job_request import PostUpdateJobRequest  # noqa: F401
 from uws_server.models.results import Results  # noqa: F401
+
+SIMPLE_PARAMETERS = {
+    "parameter": [
+        {"value": "SELECT * FROM TAP_SCHEMA.tables", "id": "QUERY", "is_post": True, "by_reference": False},
+        {"value": "ADQL", "id": "LANG", "is_post": True, "by_reference": False},
+    ]
+}
+
+client = TestClient(app)  # noqa: E501
+
+
+def build_test_job(client: TestClient):
+    response = client.request(
+        "POST",
+        "/uws",
+        json=SIMPLE_PARAMETERS,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["jobId"] is not None
+
+    return response.json()["jobId"]
 
 
 def test_delete_job(client: TestClient):
@@ -22,17 +45,16 @@ def test_delete_job(client: TestClient):
     Deletes the job
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "DELETE",
     #    "/{job_id}".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_destruction(client: TestClient):
@@ -41,17 +63,16 @@ def test_get_job_destruction(client: TestClient):
     Returns the job destruction time
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/destruction".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_error_summary(client: TestClient):
@@ -60,17 +81,16 @@ def test_get_job_error_summary(client: TestClient):
     Returns the job error summary
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/error".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_execution_duration(client: TestClient):
@@ -79,17 +99,16 @@ def test_get_job_execution_duration(client: TestClient):
     Returns the job execution duration
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/executionduration".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_list(client: TestClient):
@@ -97,19 +116,18 @@ def test_get_job_list(client: TestClient):
 
     Returns the list of UWS jobs
     """
-    params = [("phase", [uws_server.ExecutionPhase()]),     ("after", '2013-10-20T19:20:30+01:00'),     ("last", 56)]
-    headers = {
-    }
+    params = [("phase", [ExecutionPhase()]), ("after", "2013-10-20T19:20:30+01:00"), ("last", 56)]
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/",
     #    headers=headers,
     #    params=params,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_owner(client: TestClient):
@@ -118,17 +136,16 @@ def test_get_job_owner(client: TestClient):
     Returns the job owner
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/owner".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_parameters(client: TestClient):
@@ -137,17 +154,16 @@ def test_get_job_parameters(client: TestClient):
     Returns the job parameters
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/parameters".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_phase(client: TestClient):
@@ -156,17 +172,16 @@ def test_get_job_phase(client: TestClient):
     Returns the job phase
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/phase".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_quote(client: TestClient):
@@ -175,17 +190,16 @@ def test_get_job_quote(client: TestClient):
     Returns the job quote
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/quote".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_results(client: TestClient):
@@ -194,17 +208,16 @@ def test_get_job_results(client: TestClient):
     Returns the job results
     """
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}/results".format(job_id='job_id_example'),
     #    headers=headers,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_get_job_summary(client: TestClient):
@@ -212,19 +225,38 @@ def test_get_job_summary(client: TestClient):
 
     Returns the job summary
     """
-    params = [("phase", 'PENDING'),     ("wait", 56)]
-    headers = {
-    }
+
+    job_id = build_test_job(client)
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}",
+    )
+
+    assert response.status_code == 200
+
+    job_summary = response.json()
+
+    assert job_summary["jobId"] == job_id
+    assert job_summary["phase"] == "PENDING"
+    assert job_summary["parameters"] is not None
+    for param in job_summary["parameters"]['parameter']:
+        assert param["id"] in ["QUERY", "LANG"]
+        assert param["value"] in ["SELECT * FROM TAP_SCHEMA.tables", "ADQL"]
+
+    # TODO: test wait parameters
+    params = [("phase", "PENDING"), ("wait", 56)]
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "GET",
     #    "/{job_id}".format(job_id='job_id_example'),
     #    headers=headers,
     #    params=params,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_post_create_job(client: TestClient):
@@ -232,20 +264,24 @@ def test_post_create_job(client: TestClient):
 
     Submits a job
     """
-    parameters = {"parameter":[{"by_reference":0,"id":"id","is_post":1},{"by_reference":0,"id":"id","is_post":1}]}
+    parameters = SIMPLE_PARAMETERS
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
-    #    "POST",
-    #    "/",
-    #    headers=headers,
-    #    json=parameters,
-    #)
+    response = client.request(
+       "POST",
+       "/uws",
+       headers=headers,
+       json=parameters,
+    )
 
-    # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    assert response.status_code == 200
+
+    job_summary = response.json()
+
+    assert job_summary["jobId"] is not None
+    assert job_summary["phase"] == "PENDING"
+    assert job_summary["parameters"] is not None
 
 
 def test_post_update_job(client: TestClient):
@@ -253,20 +289,19 @@ def test_post_update_job(client: TestClient):
 
     Update job parameters
     """
-    post_update_job_request = uws_server.PostUpdateJobRequest()
+    post_update_job_request = PostUpdateJobRequest()
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "POST",
     #    "/{job_id}".format(job_id='job_id_example'),
     #    headers=headers,
     #    json=post_update_job_request,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_post_update_job_destruction(client: TestClient):
@@ -274,20 +309,19 @@ def test_post_update_job_destruction(client: TestClient):
 
     Updates the job destruction time
     """
-    post_update_job_destruction_request = uws_server.PostUpdateJobDestructionRequest()
+    post_update_job_destruction_request = PostUpdateJobDestructionRequest()
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "POST",
     #    "/{job_id}/destruction".format(job_id='job_id_example'),
     #    headers=headers,
     #    json=post_update_job_destruction_request,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_post_update_job_execution_duration(client: TestClient):
@@ -295,20 +329,19 @@ def test_post_update_job_execution_duration(client: TestClient):
 
     Updates the job execution duration
     """
-    post_update_job_execution_duration_request = uws_server.PostUpdateJobExecutionDurationRequest()
+    post_update_job_execution_duration_request = PostUpdateJobExecutionDurationRequest()
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "POST",
     #    "/{job_id}/executionduration".format(job_id='job_id_example'),
     #    headers=headers,
     #    json=post_update_job_execution_duration_request,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_post_update_job_parameters(client: TestClient):
@@ -316,20 +349,19 @@ def test_post_update_job_parameters(client: TestClient):
 
     Update job parameters
     """
-    post_update_job_parameters_request = uws_server.PostUpdateJobParametersRequest()
+    post_update_job_parameters_request = PostUpdateJobParametersRequest()
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "POST",
     #    "/{job_id}/parameters".format(job_id='job_id_example'),
     #    headers=headers,
     #    json=post_update_job_parameters_request,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
+    # assert response.status_code == 200
 
 
 def test_post_update_job_phase(client: TestClient):
@@ -337,18 +369,16 @@ def test_post_update_job_phase(client: TestClient):
 
     Updates the job phase
     """
-    post_update_job_phase_request = uws_server.PostUpdateJobPhaseRequest()
+    post_update_job_phase_request = PostUpdateJobPhaseRequest()
 
-    headers = {
-    }
+    headers = {}
     # uncomment below to make a request
-    #response = client.request(
+    # response = client.request(
     #    "POST",
     #    "/{job_id}/phase".format(job_id='job_id_example'),
     #    headers=headers,
     #    json=post_update_job_phase_request,
-    #)
+    # )
 
     # uncomment below to assert the status code of the HTTP response
-    #assert response.status_code == 200
-
+    # assert response.status_code == 200
