@@ -45,13 +45,28 @@ def test_delete_job(client: TestClient):
     Deletes the job
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "DELETE",
-    #    "/{job_id}".format(job_id='job_id_example'),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
+
+    # make sure the job is in the job list
+    response = client.request(
+        "GET",
+        "/uws",
+    )
+    assert response.status_code == 200
+    assert job_id in response.text
+
+    # delete the job
+    response = client.request(
+        "DELETE",
+        f"/uws/{job_id}",
+    )
+
+    # we should have been redirected to the job list
+    assert response.status_code == 303
+    assert response.headers["location"] == "/uws"
+    assert job_id not in response.text
+
+    # make sure the job is no longer in the job list
 
     # uncomment below to assert the status code of the HTTP response
     # assert response.status_code == 200
@@ -99,16 +114,15 @@ def test_get_job_execution_duration(client: TestClient):
     Returns the job execution duration
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    "/{job_id}/executionduration".format(job_id='job_id_example'),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/executionduration",
+    )
+
+    assert response.status_code == 200
+    assert response.text == "3600"
 
 
 def test_get_job_list(client: TestClient):
@@ -116,18 +130,32 @@ def test_get_job_list(client: TestClient):
 
     Returns the list of UWS jobs
     """
-    params = [("phase", [ExecutionPhase()]), ("after", "2013-10-20T19:20:30+01:00"), ("last", 56)]
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    "/",
-    #    headers=headers,
-    #    params=params,
-    # )
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    job_ids = []
+
+    for _ in range(10):
+        job_ids.append(build_test_job(client))
+
+    response = client.request(
+        "GET",
+        "/uws",
+    )
+
+    assert response.status_code == 200
+
+    job_list = response.json()
+
+    assert job_list["jobref"] is not None
+
+    job_refs = job_list["jobref"]
+
+    assert len(job_refs) == 10
+    for job_ref in job_refs:
+        assert job_ref["id"] in job_ids
+
+    # TODO - test phase, after, last
+    # params = [("phase", [ExecutionPhase()]), ("after", "2013-10-20T19:20:30+01:00"), ("last", 56)]
+    # headers = {}
 
 
 def test_get_job_owner(client: TestClient):
@@ -136,13 +164,15 @@ def test_get_job_owner(client: TestClient):
     Returns the job owner
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    "/{job_id}/owner".format(job_id='job_id_example'),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/owner",
+    )
+
+    assert response.status_code == 200
+    assert response.text == "jsmith@ivoa.net"
 
     # uncomment below to assert the status code of the HTTP response
     # assert response.status_code == 200
@@ -154,13 +184,22 @@ def test_get_job_parameters(client: TestClient):
     Returns the job parameters
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    "/{job_id}/parameters".format(job_id='job_id_example'),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/parameters",
+    )
+
+    assert response.status_code == 200
+
+    parameters = response.json()
+
+    assert parameters["parameter"] is not None
+    assert len(parameters["parameter"]) == 2
+    for param in parameters["parameter"]:
+        assert param["id"] in ["QUERY", "LANG"]
+        assert param["value"] in ["SELECT * FROM TAP_SCHEMA.tables", "ADQL"]
 
     # uncomment below to assert the status code of the HTTP response
     # assert response.status_code == 200
@@ -172,16 +211,15 @@ def test_get_job_phase(client: TestClient):
     Returns the job phase
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    "/{job_id}/phase".format(job_id='job_id_example'),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/phase",
+    )
+
+    assert response.status_code == 200
+    assert response.text == "PENDING"
 
 
 def test_get_job_quote(client: TestClient):
@@ -190,16 +228,15 @@ def test_get_job_quote(client: TestClient):
     Returns the job quote
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    "/{job_id}/quote".format(job_id='job_id_example'),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/quote",
+    )
+
+    assert response.status_code == 200
+    assert response.text is not None
 
 
 def test_get_job_results(client: TestClient):
@@ -240,7 +277,7 @@ def test_get_job_summary(client: TestClient):
     assert job_summary["jobId"] == job_id
     assert job_summary["phase"] == "PENDING"
     assert job_summary["parameters"] is not None
-    for param in job_summary["parameters"]['parameter']:
+    for param in job_summary["parameters"]["parameter"]:
         assert param["id"] in ["QUERY", "LANG"]
         assert param["value"] in ["SELECT * FROM TAP_SCHEMA.tables", "ADQL"]
 
@@ -269,10 +306,10 @@ def test_post_create_job(client: TestClient):
     headers = {}
     # uncomment below to make a request
     response = client.request(
-       "POST",
-       "/uws",
-       headers=headers,
-       json=parameters,
+        "POST",
+        "/uws",
+        headers=headers,
+        json=parameters,
     )
 
     assert response.status_code == 200
