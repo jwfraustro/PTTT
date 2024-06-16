@@ -1,7 +1,10 @@
 # coding: utf-8
 
+from datetime import datetime
+
 from fastapi.testclient import TestClient
 from uws_server.main import app
+from src.impl.uws_api_impl
 from uws_server.models.error_summary import ErrorSummary  # noqa: F401
 from uws_server.models.execution_phase import ExecutionPhase  # noqa: F401
 from uws_server.models.job_summary import JobSummary  # noqa: F401
@@ -59,17 +62,20 @@ def test_delete_job(client: TestClient):
     response = client.request(
         "DELETE",
         f"/uws/{job_id}",
+        follow_redirects=False,
     )
 
     # we should have been redirected to the job list
     assert response.status_code == 303
     assert response.headers["location"] == "/uws"
-    assert job_id not in response.text
 
     # make sure the job is no longer in the job list
-
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        "/uws",
+    )
+    assert response.status_code == 200
+    assert job_id not in response.text
 
 
 def test_get_job_destruction(client: TestClient):
@@ -78,13 +84,16 @@ def test_get_job_destruction(client: TestClient):
     Returns the job destruction time
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    "/{job_id}/destruction".format(job_id='job_id_example'),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/destruction",
+    )
+
+    assert response.status_code == 200
+    assert response.text is not None
+    assert isinstance(datetime.fromisoformat(response.text), datetime)
 
     # uncomment below to assert the status code of the HTTP response
     # assert response.status_code == 200
@@ -100,7 +109,7 @@ def test_get_job_error_summary(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "GET",
-    #    "/{job_id}/error".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}/error"),
     #    headers=headers,
     # )
 
@@ -237,6 +246,7 @@ def test_get_job_quote(client: TestClient):
 
     assert response.status_code == 200
     assert response.text is not None
+    assert isinstance(datetime.fromisoformat(response.text), datetime)
 
 
 def test_get_job_results(client: TestClient):
@@ -249,7 +259,7 @@ def test_get_job_results(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "GET",
-    #    "/{job_id}/results".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}/results",
     #    headers=headers,
     # )
 
@@ -287,7 +297,7 @@ def test_get_job_summary(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "GET",
-    #    "/{job_id}".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}",
     #    headers=headers,
     #    params=params,
     # )
@@ -332,7 +342,7 @@ def test_post_update_job(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "POST",
-    #    "/{job_id}".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}",
     #    headers=headers,
     #    json=post_update_job_request,
     # )
@@ -352,7 +362,7 @@ def test_post_update_job_destruction(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "POST",
-    #    "/{job_id}/destruction".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}/destruction",
     #    headers=headers,
     #    json=post_update_job_destruction_request,
     # )
@@ -372,7 +382,7 @@ def test_post_update_job_execution_duration(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "POST",
-    #    "/{job_id}/executionduration".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}/executionduration",
     #    headers=headers,
     #    json=post_update_job_execution_duration_request,
     # )
@@ -392,7 +402,7 @@ def test_post_update_job_parameters(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "POST",
-    #    "/{job_id}/parameters".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}/parameters",
     #    headers=headers,
     #    json=post_update_job_parameters_request,
     # )
@@ -412,7 +422,7 @@ def test_post_update_job_phase(client: TestClient):
     # uncomment below to make a request
     # response = client.request(
     #    "POST",
-    #    "/{job_id}/phase".format(job_id='job_id_example'),
+    #    f"/uws/{job_id}/phase",
     #    headers=headers,
     #    json=post_update_job_phase_request,
     # )
