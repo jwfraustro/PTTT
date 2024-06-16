@@ -31,6 +31,7 @@ class UWSAPIImpl(BaseUWSApi):
         self,
         job_id: str,
     ) -> Jobs:
+        # TODO: Delete job from cache
         if not job_cache.get_job(job_id):
             return JSONResponse(status_code=404, content={"message": "Job not found"})
 
@@ -40,49 +41,73 @@ class UWSAPIImpl(BaseUWSApi):
         self,
         job_id: str,
     ) -> datetime:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job_cache.delete_job(job_id)
 
     def get_job_error_summary(
         self,
         job_id: str,
     ) -> ErrorSummary:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job.error_summary
 
     def get_job_execution_duration(
         self,
         job_id: str,
     ) -> int:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job.execution_duration
 
     def get_job_owner(
         self,
         job_id: str,
     ) -> str:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job.owner_id
 
     def get_job_parameters(
         self,
         job_id: str,
     ) -> Parameters:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job.parameters
 
     def get_job_phase(
         self,
         job_id: str,
     ) -> ExecutionPhase:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job.phase
 
     def get_job_quote(
         self,
         job_id: str,
     ) -> datetime:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job.quote
 
     def get_job_results(
         self,
         job_id: str,
     ) -> Results:
-        ...
+        job = job_cache.get_job(job_id)
+        if not job:
+            return JSONResponse(status_code=404, content={"message": "Job not found"})
+        return job.destruction
 
     def get_job_summary(
         self,
