@@ -25,7 +25,7 @@ class BaseUWSApi:
     def delete_job(
         self,
         job_id: str,
-    ) -> Jobs:
+    ) -> None:
         ...
 
 

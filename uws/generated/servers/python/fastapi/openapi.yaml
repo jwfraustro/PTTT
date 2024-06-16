@@ -120,7 +120,7 @@ paths:
           type: string
         style: simple
       responses:
-        "200":
+        "303":
           content:
             application/xml:
               schema:
@@ -894,9 +894,11 @@ components:
           parameter:
           - byReference: false
             id: id
+            value: value
             isPost: true
           - byReference: false
             id: id
+            value: value
             isPost: true
         results:
           result:
@@ -1159,16 +1161,17 @@ components:
       xml:
         name: errorSummary
     Parameter:
-      description: |
-        The list of input parameters to the job - if
-        the job description language does not naturally have
-        parameters, then this list should contain one element which
-        is the content of the original POST that created the job.
       example:
         byReference: false
         id: id
+        value: value
         isPost: true
       properties:
+        value:
+          description: |
+            The value of the parameter
+          title: value
+          type: string
         byReference:
           default: false
           description: |
@@ -1205,13 +1208,20 @@ components:
       xml:
         name: parameter
     Parameters:
+      description: |
+        The list of input parameters to the job - if
+        the job description language does not naturally have
+        parameters, then this list should contain one element which
+        is the content of the original POST that created the job.
       example:
         parameter:
         - byReference: false
           id: id
+          value: value
           isPost: true
         - byReference: false
           id: id
+          value: value
           isPost: true
       properties:
         parameter:

@@ -158,7 +158,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/job_id'
       responses:
-        '200':
+        '303':
           description: Success
           $ref: '#/components/responses/JobListResponse'
         '403':

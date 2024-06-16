@@ -46,7 +46,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 @router.delete(
     "/uws/{job_id}",
     responses={
-        200: {"model": Jobs, "description": "Any response containing the UWS job list"},
+        303: {"model": Jobs, "description": "Any response containing the UWS job list"},
         403: {"model": object, "description": "Forbidden"},
         404: {"model": object, "description": "Job not found"},
     },
@@ -56,7 +56,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 )
 async def delete_job(
     job_id: str = Path(..., description="Job ID"),
-) -> Jobs:
+) -> None:
     
     return BaseUWSApi.subclasses[0]().delete_job(job_id)
 
