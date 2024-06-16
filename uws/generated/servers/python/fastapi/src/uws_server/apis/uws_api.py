@@ -30,7 +30,6 @@ from uws_server.models.jobs import Jobs
 from uws_server.models.parameters import Parameters
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest
 from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest
-from uws_server.models.post_update_job_parameters_request import PostUpdateJobParametersRequest
 from uws_server.models.post_update_job_phase_request import PostUpdateJobPhaseRequest
 from uws_server.models.post_update_job_request import PostUpdateJobRequest
 from uws_server.models.results import Results
@@ -324,7 +323,7 @@ async def post_update_job_execution_duration(
 @router.post(
     "/uws/{job_id}/parameters",
     responses={
-        200: {"model": JobSummary, "description": "Success"},
+        303: {"model": JobSummary, "description": "Success"},
         403: {"model": object, "description": "Forbidden"},
         404: {"model": object, "description": "Job not found"},
     },
@@ -334,10 +333,10 @@ async def post_update_job_execution_duration(
 )
 async def post_update_job_parameters(
     job_id: str = Path(..., description="Job ID"),
-    post_update_job_parameters_request: PostUpdateJobParametersRequest = Body(None, description="Destruction time to update"),
-) -> JobSummary:
+    parameters: Parameters = Body(None, description="Parameters to update"),
+) -> None:
     
-    return BaseUWSApi.subclasses[0]().post_update_job_parameters(job_id, post_update_job_parameters_request)
+    return BaseUWSApi.subclasses[0]().post_update_job_parameters(job_id, parameters)
 
 
 @router.post(

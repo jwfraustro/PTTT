@@ -365,22 +365,14 @@ paths:
       tags: [UWS]
       summary: 'Update job parameters'
       requestBody:
-        description: 'Destruction time to update'
+        description: 'Parameters to update'
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                # TAP service examples
-                QUERY:
-                  description: 'TAP query string'
-                  type: string
-                LANG:
-                  description: 'Query language'
-                  type: string
+              $ref: "#/components/schemas/Parameters"
       responses:
-        '200':
+        '303':
           description: Success
           content:
             application/xml:

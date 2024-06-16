@@ -10,7 +10,6 @@ from uws_server.models.jobs import Jobs
 from uws_server.models.parameters import Parameters
 from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest
 from uws_server.models.post_update_job_execution_duration_request import PostUpdateJobExecutionDurationRequest
-from uws_server.models.post_update_job_parameters_request import PostUpdateJobParametersRequest
 from uws_server.models.post_update_job_phase_request import PostUpdateJobPhaseRequest
 from uws_server.models.post_update_job_request import PostUpdateJobRequest
 from uws_server.models.results import Results
@@ -137,8 +136,8 @@ class BaseUWSApi:
     def post_update_job_parameters(
         self,
         job_id: str,
-        post_update_job_parameters_request: PostUpdateJobParametersRequest,
-    ) -> JobSummary:
+        parameters: Parameters,
+    ) -> None:
         ...
 
 

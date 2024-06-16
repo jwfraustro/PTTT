@@ -23,7 +23,6 @@ src/uws_server/models/parameter.py
 src/uws_server/models/parameters.py
 src/uws_server/models/post_update_job_destruction_request.py
 src/uws_server/models/post_update_job_execution_duration_request.py
-src/uws_server/models/post_update_job_parameters_request.py
 src/uws_server/models/post_update_job_phase_request.py
 src/uws_server/models/post_update_job_request.py
 src/uws_server/models/result_reference.py

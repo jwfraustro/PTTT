@@ -613,11 +613,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/postUpdateJobParameters_request'
-        description: Destruction time to update
+              $ref: '#/components/schemas/Parameters'
+        description: Parameters to update
         required: true
       responses:
-        "200":
+        "303":
           content:
             application/xml:
               schema:
@@ -1278,16 +1278,4 @@ components:
           title: DESTRUCTION
           type: string
       title: postUpdateJobDestruction_request
-      type: object
-    postUpdateJobParameters_request:
-      properties:
-        QUERY:
-          description: TAP query string
-          title: QUERY
-          type: string
-        LANG:
-          description: Query language
-          title: LANG
-          type: string
-      title: postUpdateJobParameters_request
       type: object
