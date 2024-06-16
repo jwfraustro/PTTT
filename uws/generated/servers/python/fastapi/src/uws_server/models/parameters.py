@@ -31,7 +31,7 @@ except ImportError:
 
 class Parameters(BaseModel):
     """
-    Parameters
+    The list of input parameters to the job - if the job description language does not naturally have parameters, then this list should contain one element which is the content of the original POST that created the job. 
     """ # noqa: E501
     parameter: Optional[List[Parameter]] = None
     __properties: ClassVar[List[str]] = ["parameter"]

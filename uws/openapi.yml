@@ -773,14 +773,13 @@ components:
     Parameter:
       type: object
       title: parameter
-      description: |
-        The list of input parameters to the job - if
-        the job description language does not naturally have
-        parameters, then this list should contain one element which
-        is the content of the original POST that created the job.
       required:
         - id
       properties:
+        value:
+          type: string
+          description: |
+            The value of the parameter
         byReference:
           type: boolean
           default: false
@@ -812,6 +811,11 @@ components:
     Parameters:
       type: object
       title: parameters
+      description: |
+        The list of input parameters to the job - if
+        the job description language does not naturally have
+        parameters, then this list should contain one element which
+        is the content of the original POST that created the job.
       properties:
         parameter:
           type: array

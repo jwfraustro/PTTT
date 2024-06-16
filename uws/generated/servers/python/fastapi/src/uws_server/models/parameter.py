@@ -30,12 +30,13 @@ except ImportError:
 
 class Parameter(BaseModel):
     """
-    The list of input parameters to the job - if the job description language does not naturally have parameters, then this list should contain one element which is the content of the original POST that created the job. 
+    Parameter
     """ # noqa: E501
+    value: Optional[StrictStr] = Field(default=None, description="The value of the parameter ")
     by_reference: Optional[StrictBool] = Field(default=False, description="If this attribute is true then the content of the parameter represents a URL to retrieve the actual parameter value.  It is up to the implementation to decide if a parameter value cannot be returned directly as the content - the basic rule is that the representation of the parameter must allow the whole job element to be valid XML. If this cannot be achieved then the parameter value must be returned by reference. ", alias="byReference")
     id: StrictStr = Field(description="The identifier for the parameter ")
     is_post: Optional[StrictBool] = Field(default=None, alias="isPost")
-    __properties: ClassVar[List[str]] = ["byReference", "id", "isPost"]
+    __properties: ClassVar[List[str]] = ["value", "byReference", "id", "isPost"]
 
     model_config = {
         "populate_by_name": True,
@@ -86,6 +87,7 @@ class Parameter(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "value": obj.get("value"),
             "byReference": obj.get("byReference") if obj.get("byReference") is not None else False,
             "id": obj.get("id"),
             "isPost": obj.get("isPost")
