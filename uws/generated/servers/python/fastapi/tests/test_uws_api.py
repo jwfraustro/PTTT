@@ -1,10 +1,10 @@
 # coding: utf-8
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
+from impl.uws_api_impl import simulate_error, simulate_results
 from uws_server.main import app
-from src.impl.uws_api_impl
 from uws_server.models.error_summary import ErrorSummary  # noqa: F401
 from uws_server.models.execution_phase import ExecutionPhase  # noqa: F401
 from uws_server.models.job_summary import JobSummary  # noqa: F401
@@ -14,7 +14,6 @@ from uws_server.models.post_update_job_destruction_request import PostUpdateJobD
 from uws_server.models.post_update_job_execution_duration_request import (
     PostUpdateJobExecutionDurationRequest,  # noqa: F401
 )
-from uws_server.models.post_update_job_parameters_request import PostUpdateJobParametersRequest  # noqa: F401
 from uws_server.models.post_update_job_phase_request import PostUpdateJobPhaseRequest  # noqa: F401
 from uws_server.models.post_update_job_request import PostUpdateJobRequest  # noqa: F401
 from uws_server.models.results import Results  # noqa: F401
@@ -105,16 +104,28 @@ def test_get_job_error_summary(client: TestClient):
     Returns the job error summary
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    f"/uws/{job_id}/error"),
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/error",
+    )
+
+    assert response.status_code == 200
+    assert response.text == ""
+
+    simulate_error(job_id, error_message="Error message")
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/error",
+    )
+
+    assert response.status_code == 200
+    error_message = response.json()
+
+    assert error_message["message"] == "Error message"
+    assert error_message["type"] == "fatal"
 
 
 def test_get_job_execution_duration(client: TestClient):
@@ -255,16 +266,32 @@ def test_get_job_results(client: TestClient):
     Returns the job results
     """
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    f"/uws/{job_id}/results",
-    #    headers=headers,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/results",
+    )
+
+    assert response.status_code == 200
+    assert response.text == ""
+
+    simulate_results(job_id)
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/results",
+    )
+
+
+    assert response.status_code == 200
+
+    results = response.json()
+    assert results["result"] is not None
+    assert len(results["result"]) == 1
+    assert results["result"][0]["id"] == "result1"
+
+
 
 
 def test_get_job_summary(client: TestClient):
@@ -336,19 +363,68 @@ def test_post_update_job(client: TestClient):
 
     Update job parameters
     """
-    post_update_job_request = PostUpdateJobRequest()
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "POST",
-    #    f"/uws/{job_id}",
-    #    headers=headers,
-    #    json=post_update_job_request,
-    # )
+    # test DELETE
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "POST",
+        f"/uws/{job_id}",
+        json={"action": "DELETE"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}",
+    )
+
+    assert response.status_code == 404
+
+    # test phase
+    job_id = build_test_job(client)
+
+    response = client.request(
+        "POST",
+        f"/uws/{job_id}",
+        json={"phase": "RUN"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/phase",
+    )
+
+    assert response.status_code == 200
+    assert response.text == ExecutionPhase.EXECUTING.value
+
+    # test destruction
+    job_id = build_test_job(client)
+
+    new_destruction = datetime.now() + timedelta(days=7)
+
+    response = client.request(
+        "POST",
+        f"/uws/{job_id}",
+        json={"destruction": new_destruction.isoformat()},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/destruction",
+    )
+
+    assert response.status_code == 200
+    assert response.text is not None
+    assert response.text == new_destruction.isoformat()
 
 
 def test_post_update_job_destruction(client: TestClient):
@@ -356,19 +432,38 @@ def test_post_update_job_destruction(client: TestClient):
 
     Updates the job destruction time
     """
-    post_update_job_destruction_request = PostUpdateJobDestructionRequest()
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "POST",
-    #    f"/uws/{job_id}/destruction",
-    #    headers=headers,
-    #    json=post_update_job_destruction_request,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/destruction",
+    )
+    assert response.status_code == 200
+    assert response.text is not None
+
+    destruction = datetime.fromisoformat(response.text)
+    # our example destruction is 3 days from now
+    assert destruction > datetime.now() + timedelta(days=2)
+
+    new_destruction = datetime.now() + timedelta(days=7)
+
+    response = client.request(
+        "POST",
+        f"/uws/{job_id}/destruction",
+        json={"destruction": new_destruction.isoformat()},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/destruction",
+    )
+
+    assert response.status_code == 200
+    assert response.text == new_destruction.isoformat()
 
 
 def test_post_update_job_execution_duration(client: TestClient):
@@ -376,19 +471,34 @@ def test_post_update_job_execution_duration(client: TestClient):
 
     Updates the job execution duration
     """
-    post_update_job_execution_duration_request = PostUpdateJobExecutionDurationRequest()
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "POST",
-    #    f"/uws/{job_id}/executionduration",
-    #    headers=headers,
-    #    json=post_update_job_execution_duration_request,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/executionduration",
+    )
+    assert response.status_code == 200
+    assert response.text == "3600"
+
+    execution_duration = 999
+
+    response = client.request(
+        "POST",
+        f"/uws/{job_id}/executionduration",
+        json={"executionduration": execution_duration},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/executionduration",
+    )
+
+    assert response.status_code == 200
+    assert response.text == str(execution_duration)
 
 
 def test_post_update_job_parameters(client: TestClient):
@@ -396,19 +506,42 @@ def test_post_update_job_parameters(client: TestClient):
 
     Update job parameters
     """
-    post_update_job_parameters_request = PostUpdateJobParametersRequest()
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "POST",
-    #    f"/uws/{job_id}/parameters",
-    #    headers=headers,
-    #    json=post_update_job_parameters_request,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    test_params = {
+        "parameter": [
+            {"value": "BAD QUERY", "id": "QUERY", "is_post": True, "by_reference": False},
+            {"value": "NEW_VALUE", "id": "NEW_PARAM", "is_post": True, "by_reference": False},
+        ]
+    }
+
+    response = client.request(
+        "POST",
+        f"/uws/{job_id}/parameters",
+        json=test_params,
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}/parameters",
+    )
+
+    assert response.status_code == 200
+
+    parameters = response.json()
+
+    assert parameters["parameter"] is not None
+    for param in parameters["parameter"]:
+        if param["id"] == "QUERY":
+            assert param["value"] == "BAD QUERY"  # QUERY parameter should have been updated
+        if param["id"] == "LANG":
+            assert param["value"] == "ADQL"  # LANG should not
+        if param["id"] == "NEW_PARAM":
+            assert param["value"] == "NEW_VALUE"  # NEW_PARAM should now exist
 
 
 def test_post_update_job_phase(client: TestClient):
@@ -416,16 +549,30 @@ def test_post_update_job_phase(client: TestClient):
 
     Updates the job phase
     """
-    post_update_job_phase_request = PostUpdateJobPhaseRequest()
 
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "POST",
-    #    f"/uws/{job_id}/phase",
-    #    headers=headers,
-    #    json=post_update_job_phase_request,
-    # )
+    job_id = build_test_job(client)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
+    new_phases = [
+        ("RUN", ExecutionPhase.EXECUTING),
+        ("ABORT", ExecutionPhase.ABORTED),
+        ("SUSPEND", ExecutionPhase.SUSPENDED),
+        ("ARCHIVE", ExecutionPhase.ARCHIVED),
+    ]
+
+    for phase_action, expected_phase in new_phases:
+        response = client.request(
+            "POST",
+            f"/uws/{job_id}/phase",
+            json={"phase": phase_action},
+            follow_redirects=False,
+        )
+
+        assert response.status_code == 303
+
+        response = client.request(
+            "GET",
+            f"/uws/{job_id}/phase",
+        )
+
+        assert response.status_code == 200
+        assert response.text == expected_phase.value
