@@ -82,7 +82,8 @@ class UWSCache:
 
     def update_job(self, job_id: str, job: dict):
         """Update a job in the cache."""
-        self.add_job(job_id, job)
+
+        self.jobs[job_id] = job
 
     def delete_job(self, job_id: str):
         """Delete a job from the cache."""
