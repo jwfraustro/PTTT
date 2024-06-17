@@ -94,9 +94,6 @@ def test_get_job_destruction(client: TestClient):
     assert response.text is not None
     assert isinstance(datetime.fromisoformat(response.text), datetime)
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
-
 
 def test_get_job_error_summary(client: TestClient):
     """Test case for get_job_error_summary
@@ -194,8 +191,6 @@ def test_get_job_owner(client: TestClient):
     assert response.status_code == 200
     assert response.text == "jsmith@ivoa.net"
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
 
 
 def test_get_job_parameters(client: TestClient):
@@ -221,8 +216,6 @@ def test_get_job_parameters(client: TestClient):
         assert param["id"] in ["QUERY", "LANG"]
         assert param["value"] in ["SELECT * FROM TAP_SCHEMA.tables", "ADQL"]
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
 
 
 def test_get_job_phase(client: TestClient):
@@ -292,8 +285,6 @@ def test_get_job_results(client: TestClient):
     assert results["result"][0]["id"] == "result1"
 
 
-
-
 def test_get_job_summary(client: TestClient):
     """Test case for get_job_summary
 
@@ -329,8 +320,6 @@ def test_get_job_summary(client: TestClient):
     #    params=params,
     # )
 
-    # uncomment below to assert the status code of the HTTP response
-    # assert response.status_code == 200
 
 
 def test_post_create_job(client: TestClient):
