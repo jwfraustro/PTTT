@@ -66,6 +66,9 @@ class UWSCache:
         # Filter by phase
         if phase:
             all_jobs = [job for job in all_jobs if job.phase in phase]
+        else:
+            # UWS 1.1 excludes ARCHIVED jobs from the default list
+            all_jobs = [job for job in all_jobs if job.phase != ExecutionPhase.ARCHIVED]
 
         # Filter by after
         if after:

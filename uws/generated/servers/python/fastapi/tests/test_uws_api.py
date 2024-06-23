@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import time
 from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
@@ -26,7 +27,6 @@ SIMPLE_PARAMETERS = {
 }
 
 client = TestClient(app)  # noqa: E501
-
 
 def build_test_job(client: TestClient):
     response = client.request(
@@ -170,9 +170,176 @@ def test_get_job_list(client: TestClient):
     for job_ref in job_refs:
         assert job_ref["id"] in job_ids
 
-    # TODO - test phase, after, last
-    # params = [("phase", [ExecutionPhase()]), ("after", "2013-10-20T19:20:30+01:00"), ("last", 56)]
-    # headers = {}
+
+def test_get_job_list_last(client: TestClient):
+    """Test case for get_job_list
+
+    Tests the "last" parameter, which should return the last N jobs
+    """
+
+    job_ids = []
+
+    for _ in range(10):
+        job_ids.append(build_test_job(client))
+
+    # test "LAST" parameter
+    response = client.request(
+        "GET",
+        "/uws",
+        params={"LAST": 5},
+    )
+
+    assert response.status_code == 200
+    job_list = response.json()
+
+    assert job_list["jobref"] is not None
+    assert len(job_list["jobref"]) == 5
+
+    # assert the jobs are in the correct order
+    desc_job_list = reversed(job_ids)
+    for job_ref in job_list["jobref"]:
+        assert job_ref["id"] == next(desc_job_list)
+
+
+def test_get_job_list_after(client: TestClient):
+    """Test case for get_job_list
+
+    Tests the "after" parameter, which should return jobs created after a certain time
+    """
+    # create a job before the specified time
+    build_test_job(client)
+
+    after_time = datetime.now()
+
+    # wait a bit
+    time.sleep(2)
+
+    # create a job after the specified time
+    job_id_after = build_test_job(client)
+
+    # test "AFTER" parameter
+    response = client.request(
+        "GET",
+        "/uws",
+        params={"AFTER": after_time.isoformat()},
+    )
+
+    assert response.status_code == 200
+    job_list = response.json()
+
+    assert job_list["jobref"] is not None
+    assert len(job_list["jobref"]) == 1
+    assert job_list["jobref"][0]["id"] == job_id_after
+
+
+def test_get_job_list_phase(client: TestClient):
+    """Test case for get_job_list
+
+    Tests the "phase" parameter, which should return jobs in the specified phase
+    """
+
+    # create a job in a few phases
+    pending_job = build_test_job(client)
+    executing_job = build_test_job(client)
+    aborted_job = build_test_job(client)
+    archived_job = build_test_job(client)
+
+    # map of job_id to phase
+    update_phases = [
+        {"job_id": executing_job, "phase": "RUN"},
+        {"job_id": aborted_job, "phase": "ABORT"},
+        {"job_id": archived_job, "phase": "ARCHIVE"},
+    ]
+
+    # update the phases
+    for update_phase in update_phases:
+        response = client.request(
+            "POST",
+            f"/uws/{update_phase['job_id']}",
+            json={"phase": update_phase["phase"]},
+            follow_redirects=False,
+        )
+
+        assert response.status_code == 303
+
+    # test the standard job list
+    response = client.request(
+        "GET",
+        "/uws",
+    )
+
+    assert response.status_code == 200
+    job_list = response.json()
+
+    assert job_list["jobref"] is not None
+
+    # archived job should not be in the list
+    assert len(job_list["jobref"]) == 3
+    assert archived_job not in [job["id"] for job in job_list["jobref"]]
+
+    # test "PHASE" parameter
+    response = client.request(
+        "GET",
+        "/uws",
+        params={"PHASE": "PENDING"},
+    )
+
+    assert response.status_code == 200
+    job_list = response.json()
+
+    assert job_list["jobref"] is not None
+    assert len(job_list["jobref"]) == 1
+    assert job_list["jobref"][0]["id"] == pending_job
+
+    # test the other phases
+    status_phases = [
+        {"job_id": executing_job, "phase": "EXECUTING"},
+        {"job_id": aborted_job, "phase": "ABORTED"},
+        {"job_id": archived_job, "phase": "ARCHIVED"},
+    ]
+
+    for status_phase in status_phases:
+        response = client.request(
+            "GET",
+            "/uws",
+            params={"PHASE": status_phase["phase"]},
+        )
+
+        assert response.status_code == 200
+        job_list = response.json()
+
+        assert job_list["jobref"] is not None
+        assert len(job_list["jobref"]) == 1
+        assert job_list["jobref"][0]["id"] == status_phase["job_id"]
+
+    # test multiple phases
+    response = client.request(
+        "GET",
+        "/uws",
+        params={"PHASE": [ExecutionPhase.PENDING.value, ExecutionPhase.EXECUTING.value]},
+    )
+
+    assert response.status_code == 200
+    job_list = response.json()
+
+    assert job_list["jobref"] is not None
+    assert len(job_list["jobref"]) == 2
+    assert pending_job in [job["id"] for job in job_list["jobref"]]
+    assert executing_job in [job["id"] for job in job_list["jobref"]]
+
+    # test archived job
+    response = client.request(
+        "GET",
+        "/uws",
+        params={"PHASE": ExecutionPhase.ARCHIVED.value},
+    )
+
+    assert response.status_code == 200
+    job_list = response.json()
+
+    assert job_list["jobref"] is not None
+    assert len(job_list["jobref"]) == 1
+    assert job_list["jobref"][0]["id"] == archived_job
 
 
 def test_get_job_owner(client: TestClient):
@@ -190,7 +357,6 @@ def test_get_job_owner(client: TestClient):
 
     assert response.status_code == 200
     assert response.text == "jsmith@ivoa.net"
-
 
 
 def test_get_job_parameters(client: TestClient):
@@ -215,7 +381,6 @@ def test_get_job_parameters(client: TestClient):
     for param in parameters["parameter"]:
         assert param["id"] in ["QUERY", "LANG"]
         assert param["value"] in ["SELECT * FROM TAP_SCHEMA.tables", "ADQL"]
-
 
 
 def test_get_job_phase(client: TestClient):
@@ -276,7 +441,6 @@ def test_get_job_results(client: TestClient):
         f"/uws/{job_id}/results",
     )
 
-
     assert response.status_code == 200
 
     results = response.json()
@@ -319,7 +483,6 @@ def test_get_job_summary(client: TestClient):
     #    headers=headers,
     #    params=params,
     # )
-
 
 
 def test_post_create_job(client: TestClient):
