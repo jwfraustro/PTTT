@@ -19,7 +19,6 @@ from impl.cache.uws_cache import UWSCache
 
 job_cache = UWSCache()
 
-
 class UWSAPIImpl(BaseUWSApi):
     def get_job_list(
         self, phase: List[ExecutionPhase] = [], after: Optional[str] = None, last: Optional[int] = None
@@ -124,7 +123,7 @@ class UWSAPIImpl(BaseUWSApi):
         phase: str,
         wait: int,
     ) -> JobSummary:
-        job = job_cache.get_job(job_id)
+        job = job_cache.get_job(job_id, phase=phase, wait=wait)
         if not job:
             return JSONResponse(status_code=404, content={"message": "Job not found"})
 

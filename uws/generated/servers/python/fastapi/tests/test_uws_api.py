@@ -4,20 +4,8 @@ import time
 from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
-from impl.uws_api_impl import simulate_error, simulate_results
-from uws_server.main import app
-from uws_server.models.error_summary import ErrorSummary  # noqa: F401
-from uws_server.models.execution_phase import ExecutionPhase  # noqa: F401
-from uws_server.models.job_summary import JobSummary  # noqa: F401
-from uws_server.models.jobs import Jobs  # noqa: F401
-from uws_server.models.parameters import Parameters  # noqa: F401
-from uws_server.models.post_update_job_destruction_request import PostUpdateJobDestructionRequest  # noqa: F401
-from uws_server.models.post_update_job_execution_duration_request import (
-    PostUpdateJobExecutionDurationRequest,  # noqa: F401
-)
-from uws_server.models.post_update_job_phase_request import PostUpdateJobPhaseRequest  # noqa: F401
-from uws_server.models.post_update_job_request import PostUpdateJobRequest  # noqa: F401
-from uws_server.models.results import Results  # noqa: F401
+from impl.uws_api_impl import job_cache, simulate_error, simulate_results
+from uws_server.models.execution_phase import ExecutionPhase
 
 SIMPLE_PARAMETERS = {
     "parameter": [
@@ -26,7 +14,6 @@ SIMPLE_PARAMETERS = {
     ]
 }
 
-client = TestClient(app)  # noqa: E501
 
 def build_test_job(client: TestClient):
     response = client.request(
@@ -46,6 +33,8 @@ def test_delete_job(client: TestClient):
 
     Deletes the job
     """
+
+    job_cache.clear()
 
     job_id = build_test_job(client)
 
@@ -83,6 +72,8 @@ def test_get_job_destruction(client: TestClient):
     Returns the job destruction time
     """
 
+    job_cache.clear()
+
     job_id = build_test_job(client)
 
     response = client.request(
@@ -100,6 +91,7 @@ def test_get_job_error_summary(client: TestClient):
 
     Returns the job error summary
     """
+    job_cache.clear()
 
     job_id = build_test_job(client)
 
@@ -131,6 +123,8 @@ def test_get_job_execution_duration(client: TestClient):
     Returns the job execution duration
     """
 
+    job_cache.clear()
+
     job_id = build_test_job(client)
 
     response = client.request(
@@ -147,6 +141,8 @@ def test_get_job_list(client: TestClient):
 
     Returns the list of UWS jobs
     """
+
+    job_cache.clear()
 
     job_ids = []
 
@@ -177,6 +173,8 @@ def test_get_job_list_last(client: TestClient):
     Tests the "last" parameter, which should return the last N jobs
     """
 
+    job_cache.clear()
+
     job_ids = []
 
     for _ in range(10):
@@ -206,6 +204,9 @@ def test_get_job_list_after(client: TestClient):
 
     Tests the "after" parameter, which should return jobs created after a certain time
     """
+
+    job_cache.clear()
+
     # create a job before the specified time
     build_test_job(client)
 
@@ -237,6 +238,8 @@ def test_get_job_list_phase(client: TestClient):
 
     Tests the "phase" parameter, which should return jobs in the specified phase
     """
+
+    job_cache.clear()
 
     # create a job in a few phases
     pending_job = build_test_job(client)
@@ -348,6 +351,8 @@ def test_get_job_owner(client: TestClient):
     Returns the job owner
     """
 
+    job_cache.clear()
+
     job_id = build_test_job(client)
 
     response = client.request(
@@ -364,6 +369,8 @@ def test_get_job_parameters(client: TestClient):
 
     Returns the job parameters
     """
+
+    job_cache.clear()
 
     job_id = build_test_job(client)
 
@@ -389,6 +396,8 @@ def test_get_job_phase(client: TestClient):
     Returns the job phase
     """
 
+    job_cache.clear()
+
     job_id = build_test_job(client)
 
     response = client.request(
@@ -405,6 +414,8 @@ def test_get_job_quote(client: TestClient):
 
     Returns the job quote
     """
+
+    job_cache.clear()
 
     job_id = build_test_job(client)
 
@@ -423,6 +434,8 @@ def test_get_job_results(client: TestClient):
 
     Returns the job results
     """
+
+    job_cache.clear()
 
     job_id = build_test_job(client)
 
@@ -455,6 +468,8 @@ def test_get_job_summary(client: TestClient):
     Returns the job summary
     """
 
+    job_cache.clear()
+
     job_id = build_test_job(client)
 
     response = client.request(
@@ -473,16 +488,23 @@ def test_get_job_summary(client: TestClient):
         assert param["id"] in ["QUERY", "LANG"]
         assert param["value"] in ["SELECT * FROM TAP_SCHEMA.tables", "ADQL"]
 
-    # TODO: test wait parameters
-    params = [("phase", "PENDING"), ("wait", 56)]
-    headers = {}
-    # uncomment below to make a request
-    # response = client.request(
-    #    "GET",
-    #    f"/uws/{job_id}",
-    #    headers=headers,
-    #    params=params,
-    # )
+    # test polling
+
+    start_time = time.time()
+
+    response = client.request(
+        "GET",
+        f"/uws/{job_id}",
+        params={"PHASE": "EXECUTING", "WAIT": 10},
+    )
+
+    assert response.status_code == 200
+
+    # in our example implementation we have a 5 second wait
+    # and have the cache update the phase when done
+    # ordinarily the phase change would be due to the job actually changing phase
+    assert response.json()["phase"] == "EXECUTING"
+    assert time.time() - start_time > 2
 
 
 def test_post_create_job(client: TestClient):
@@ -490,6 +512,9 @@ def test_post_create_job(client: TestClient):
 
     Submits a job
     """
+
+    job_cache.clear()
+
     parameters = SIMPLE_PARAMETERS
 
     headers = {}
@@ -515,6 +540,8 @@ def test_post_update_job(client: TestClient):
 
     Update job parameters
     """
+
+    job_cache.clear()
 
     # test DELETE
     job_id = build_test_job(client)
@@ -585,6 +612,8 @@ def test_post_update_job_destruction(client: TestClient):
     Updates the job destruction time
     """
 
+    job_cache.clear()
+
     job_id = build_test_job(client)
 
     response = client.request(
@@ -624,6 +653,8 @@ def test_post_update_job_execution_duration(client: TestClient):
     Updates the job execution duration
     """
 
+    job_cache.clear()
+
     job_id = build_test_job(client)
 
     response = client.request(
@@ -658,6 +689,8 @@ def test_post_update_job_parameters(client: TestClient):
 
     Update job parameters
     """
+
+    job_cache.clear()
 
     job_id = build_test_job(client)
 
@@ -701,6 +734,8 @@ def test_post_update_job_phase(client: TestClient):
 
     Updates the job phase
     """
+
+    job_cache.clear()
 
     job_id = build_test_job(client)
 
