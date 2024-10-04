@@ -1,1 +1,0 @@
-# {{cookiecutter.protocol_full_title}}

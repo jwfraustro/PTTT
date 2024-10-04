@@ -1,3 +1,0 @@
-inputSpec: {{ cookiecutter.output_dir }}/openapi.yml
-generatorName: python
-outputDir: {{ cookiecutter.output_dir }}/generated/clients/python
