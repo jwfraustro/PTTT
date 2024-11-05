@@ -71,7 +71,7 @@ paths:
                   example: 'ADQL'
               additionalProperties: true
       responses:
-        '303':
+        '200':
           description: "Success"
           $ref: '#/components/responses/JobSummaryResponse'
         '403':
@@ -160,7 +160,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/job-id'
       responses:
-        '200':
+        '303':
           description: Success
           $ref: '#/components/responses/JobListResponse'
         '403':
@@ -203,7 +203,7 @@ paths:
                     - "SUSPEND"
                     - "ARCHIVE"
       responses:
-        '303':
+        '200':
           description: "Success"
           $ref: '#/components/responses/JobSummaryResponse'
         '403':
@@ -241,7 +241,7 @@ paths:
                 EXECUTIONDURATION:
                   type: integer
       responses:
-        '303':
+        '200':
           description: Success
           $ref: '#/components/responses/JobSummaryResponse'
         '403':
@@ -262,6 +262,8 @@ paths:
               schema:
                 type: string
                 format: date-time
+        '204':
+          description: 'No destruction time set'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -281,7 +283,7 @@ paths:
                   type: string
                   format: date-time
       responses:
-        '303':
+        '200':
           description: Success
           content:
             text/plain:
@@ -351,7 +353,7 @@ paths:
       operationId: postUpdateJobParameters
       summary: 'Update job parameters'
       requestBody:
-        description: 'Destruction time to update'
+        description: 'Parameters to update'
         required: true
         content:
           application/x-www-form-urlencoded:
