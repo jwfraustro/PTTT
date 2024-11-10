@@ -16,6 +16,8 @@ info:
 servers:
   - url: /
 
+security: []
+
 tags:
   - name: UWS
     description: 'Universal Worker Service'
