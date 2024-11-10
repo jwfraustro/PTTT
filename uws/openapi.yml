@@ -24,18 +24,18 @@ paths:
       operationId: getJobList
       summary: Returns the list of UWS jobs
       parameters:
-        - name: PHASE
+        - name: phase
           in: query
           description: 'Execution phase of the job to filter for'
           schema:
             $ref: '#/components/schemas/ExecutionPhase'
-        - name: AFTER
+        - name: after
           in: query
           description: 'Return jobs submitted after this date'
           schema:
             type: string
             format: date-time
-        - name: LAST
+        - name: last
           in: query
           description: 'Return only the last N jobs'
           schema:
@@ -85,7 +85,7 @@ paths:
       operationId: getJobSummary
       summary: 'Returns the job summary'
       parameters:
-        - name: PHASE
+        - name: phase
           in: query
           description: 'Phase of the job to poll for'
           schema:
@@ -95,7 +95,7 @@ paths:
               - "QUEUED"
               - "EXECUTING"
             example: "PENDING"
-        - name: WAIT
+        - name: wait
           in: query
           description: 'Maximum time to wait for the job to change phases.'
           schema:
