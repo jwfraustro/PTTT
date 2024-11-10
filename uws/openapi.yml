@@ -29,20 +29,20 @@ paths:
       tags: [UWS]
       summary: Returns the list of UWS jobs
       parameters:
-        - name: PHASE
+        - name: phase
           in: query
           description: 'Execution phase of the job to filter for'
           schema:
             type: array
             items:
               $ref: '#/components/schemas/ExecutionPhase'
-        - name: AFTER
+        - name: after
           in: query
           description: 'Return jobs submitted after this date'
           schema:
             type: string
             format: date-time
-        - name: LAST
+        - name: last
           in: query
           description: 'Return only the last N jobs'
           schema:
@@ -68,7 +68,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Parameters'
       responses:
-        '303':
+        '200':
           description: "Success"
           $ref: '#/components/responses/JobSummaryResponse'
         '403':
@@ -83,7 +83,7 @@ paths:
       tags: [UWS]
       summary: 'Returns the job summary'
       parameters:
-        - name: PHASE
+        - name: phase
           in: query
           description: 'Phase of the job to poll for'
           schema:
@@ -93,7 +93,7 @@ paths:
               - "QUEUED"
               - "EXECUTING"
             example: "PENDING"
-        - name: WAIT
+        - name: wait
           in: query
           description: 'Maximum time to wait for the job to change phases.'
           schema:
@@ -136,14 +136,21 @@ paths:
                   enum:
                     - "DELETE"
       responses:
-        '303':
-          description: Success
+        '200':
+          description: Success (when updating a job.) When updating the destruction time, the response is the new destruction time.
           content:
+            text/plain:
+              schema:
+                type: string
+                format: date-time
             application/json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Jobs'
                   - $ref: '#/components/schemas/JobSummary'
+        '303':
+          description: Success (when deleting a job.)
+          $ref: '#/components/responses/JobListResponse'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -200,7 +207,7 @@ paths:
                     - "SUSPEND"
                     - "ARCHIVE"
       responses:
-        '303':
+        '200':
           description: "Success"
           $ref: '#/components/responses/JobSummaryResponse'
         '403':
@@ -240,7 +247,7 @@ paths:
                 EXECUTIONDURATION:
                   type: integer
       responses:
-        '303':
+        '200':
           description: Success
           $ref: '#/components/responses/JobSummaryResponse'
         '403':
@@ -262,6 +269,8 @@ paths:
               schema:
                 type: string
                 format: date-time
+        '204':
+          description: 'No destruction time set'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -282,7 +291,7 @@ paths:
                   type: string
                   format: date-time
       responses:
-        '303':
+        '200':
           description: Success
           content:
             application/json:
